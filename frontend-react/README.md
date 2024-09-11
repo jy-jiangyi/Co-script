@@ -1,0 +1,11 @@
+# README
+
+## 1 Dependency and Environment
+get into /frontend-react.
+
+1. install node_modules: Run `npm install`
+2. install react-router-dom@6 `npm install react-router-dom@6`
+3. install ant-design: Run `npm install antd --save`
+
+## 2 Run frontend
+`npm run dev`
