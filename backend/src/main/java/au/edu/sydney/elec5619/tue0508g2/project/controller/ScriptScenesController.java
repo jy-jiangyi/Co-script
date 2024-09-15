@@ -40,7 +40,7 @@ public class ScriptScenesController {
         if (scriptScene == null) {
             return "ScriptScene not found";
         }
-        scriptScene.setScript_id(scriptSceneDetails.getScript_id());
+//        scriptScene.setScript_id(scriptSceneDetails.getScript_id());
         scriptScene.setScene(scriptSceneDetails.getScene());
         scriptScene.setContent(scriptSceneDetails.getContent());
         scriptScene.setTitle(scriptSceneDetails.getTitle());
