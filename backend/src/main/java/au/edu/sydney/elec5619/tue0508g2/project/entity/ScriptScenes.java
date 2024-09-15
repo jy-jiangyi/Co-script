@@ -1,20 +1,19 @@
 package au.edu.sydney.elec5619.tue0508g2.project.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name="script_scenes")
 public class ScriptScenes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private long script_id;  // 用于存储 script_id 的字段
+//    NOTE: delete it due to it cause problem: Column 'script_id' is duplicated in mapping for entity Script Scene
+//     long script_id;  // 用于存储 script_id 的字段
 
     private int scene;
 
@@ -26,6 +25,18 @@ public class ScriptScenes {
 
     private LocalDateTime update_time;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "script_id")
+    private Script script;
+
+    public Script getScript() {
+        return script;
+    }
+
+    public void setScript(Script script) {
+        this.script = script;
+    }
+
     // Getters and Setters
     public long getId() {
         return id;
@@ -35,13 +46,13 @@ public class ScriptScenes {
         this.id = id;
     }
 
-    public long getScript_id() {
-        return script_id;
-    }
-
-    public void setScript_id(long script_id) {
-        this.script_id = script_id;
-    }
+//    public long getScript_id() {
+//        return script_id;
+//    }
+//
+//    public void setScript_id(long script_id) {
+//        this.script_id = script_id;
+//    }
 
     public int getScene() {
         return scene;
