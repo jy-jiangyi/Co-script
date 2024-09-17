@@ -23,6 +23,30 @@ CREATE TRIGGER before_update_users
     ON users
     FOR EACH ROW SET NEW.update_time = NOW();
 
+DROP TABLE IF EXISTS scripts;
+
+-- 创建脚本表
+CREATE TABLE scripts
+(
+    id          BIGINT  NOT NULL AUTO_INCREMENT PRIMARY KEY, -- 主键,自增
+    creator     BIGINT  NOT NULL, -- 外键，指向用户表
+    name CHAR(50) NOT NULL,       -- 脚本名称
+    create_time DATETIME,         -- 创建时间
+    update_time DATETIME,         -- 更新时间
+    FOREIGN KEY (creator) REFERENCES users(id)
+);
+
+-- 创建 before insert 触发器，设置 create_time
+CREATE TRIGGER before_insert_script
+    BEFORE INSERT
+    ON scripts
+    FOR EACH ROW SET NEW.create_time = NOW();
+
+-- 创建 before update 触发器，设置 update_time
+CREATE TRIGGER before_update_script
+    BEFORE UPDATE
+    ON scripts
+    FOR EACH ROW SET NEW.update_time = NOW();
 
 DROP TABLE IF EXISTS script_scenes;
 

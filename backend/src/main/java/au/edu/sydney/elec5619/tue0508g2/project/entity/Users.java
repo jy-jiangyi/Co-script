@@ -1,14 +1,12 @@
 package au.edu.sydney.elec5619.tue0508g2.project.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users")
 public class Users {
 
     @Id
