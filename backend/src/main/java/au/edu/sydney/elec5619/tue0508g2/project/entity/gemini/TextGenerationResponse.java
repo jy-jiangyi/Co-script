@@ -30,6 +30,7 @@ public class TextGenerationResponse {
     @Data
     public static class Part{
         public String text;
+
     }
 
 }

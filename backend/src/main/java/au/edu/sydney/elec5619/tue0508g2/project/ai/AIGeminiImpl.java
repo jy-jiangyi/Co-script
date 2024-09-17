@@ -3,6 +3,7 @@ package au.edu.sydney.elec5619.tue0508g2.project.ai;
 import au.edu.sydney.elec5619.tue0508g2.project.config.GeminiConfig;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.gemini.TextGenerationRequest;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.gemini.TextGenerationResponse;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AITestRequestBody;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +31,12 @@ public class AIGeminiImpl implements AIAgent{
                 .build();
     }
 
-    public Mono<String> textGeneration(String promote) {
+    public Mono<String> textGeneration(AITestRequestBody body) {
         return webClient.post()
                 .uri(":generateContent?key={key}")
                 .bodyValue(
                         TextGenerationRequest.build_by_parts(
-                                promote
+                                body.getPromot()
                         )
                 )
                 .retrieve()
@@ -44,6 +45,7 @@ public class AIGeminiImpl implements AIAgent{
                     return response.getCandidates().getFirst()
                             .getContent().getParts()
                             .getFirst().getText();
+
                 })
                 .onErrorResume(e -> {
                     return Mono.just(e.toString());
