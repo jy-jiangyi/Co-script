@@ -1,4 +1,6 @@
 Drop table if exists users;
+Drop table if exists context_reference
+Drop table if exists scripts_relation
 
 Create table users(
     id BIGINT,
@@ -10,6 +12,28 @@ Create table users(
     update_time datetime,
     PRIMARY KEY (id)
 );
+
+-- create table context reference
+Create table context_reference(
+    id BIGINT,
+    script_id BIGINT NOT NULL ,
+    context_id BIGINT NOT NULL ,
+    PRIMARY KEY (id),
+    FOREIGN KEY (script_id) REFERENCES scripts(id),
+    FOREIGN KEY (context_id) REFERENCES context(id)
+);
+
+-- create table scripts relation
+Create table scripts_relation(
+    id BIGINT,
+    parent_id BIGINT NOT NULL,
+    child_id BIGINT NOT NULL,
+    relation char(50) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (parent_id) REFERENCES scripts(id),
+    FOREIGN KEY (child_id) REFERENCES scripts(id)
+);
+
 
 CREATE TRIGGER before_insert_users
     BEFORE INSERT ON users
