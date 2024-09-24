@@ -1,6 +1,9 @@
-Drop table if exists users;
-Drop table if exists context_reference;
 Drop table if exists scripts_relation;
+Drop table if exists context_reference;
+Drop table if exists script_scenes;
+Drop table if exists context;
+Drop table if exists scripts;
+Drop table if exists users;
 
 Create table users
 (
