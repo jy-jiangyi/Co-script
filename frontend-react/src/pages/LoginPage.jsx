@@ -42,9 +42,9 @@ const LoginPage = () => {
                     Do not have an account? Register{' '} 
                     <Link to="/register">here</Link>
                 </Form.Item>
-                <Form.Item style={{ textAlign: 'center' }}>
+                {/* <Form.Item style={{ textAlign: 'center' }}>
                     <Link to="/forgot-password">Forgot password</Link>
-                </Form.Item>
+                </Form.Item> */}
             </Form>
         </div>
     );
