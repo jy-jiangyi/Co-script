@@ -1,17 +1,18 @@
-Drop table if exists users;
-Drop table if exists scripts;
 Drop table if exists scripts_relation;
 Drop table if exists script_scenes;
-Drop table if exists context;
 Drop table if exists context_reference;
+Drop table if exists context;
+Drop table if exists scripts_creation;
+Drop table if exists scripts;
+Drop table if exists users;
 
 -- create table users
 Create table users
 (
-    id            BIGINT,
+    id            BIGINT       NOT NULL AUTO_INCREMENT, -- auto increment,
     email         VARCHAR(128) NOT NULL,
     name          VARCHAR(64)  NOT NULL,
-    role          INT          NOT NULL,
+    role          CHAR(32)     NOT NULL,
     password_hash CHAR(64)     NOT NULL,
     create_time   datetime,
     update_time   datetime,
@@ -28,8 +29,6 @@ CREATE TRIGGER before_update_users
     BEFORE UPDATE
     ON users
     FOR EACH ROW SET NEW.update_time = NOW();
-
-DROP TABLE IF EXISTS scripts;
 
 -- 创建脚本表
 CREATE TABLE scripts
@@ -54,8 +53,6 @@ CREATE TRIGGER before_update_script
     BEFORE UPDATE
     ON scripts
     FOR EACH ROW SET NEW.update_time = NOW();
-
-DROP TABLE IF EXISTS script_scenes;
 
 CREATE TABLE script_scenes
 (
