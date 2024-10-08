@@ -31,7 +31,8 @@ public class AIOpenAIImpl {
                         ImageGenerationRequest.build(
                                 body.getPrompt(),
                                 body.getN(),
-                                body.getSize()
+                                body.getSize(),
+                                body.getModel()
                         )
                 )
                 .retrieve()
