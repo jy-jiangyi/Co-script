@@ -97,23 +97,11 @@ CREATE TABLE context
     description    CHAR(50) NOT NULL,               -- description
     positive    TEXT     NOT NULL,                   -- positive context
     negative    TEXT     NOT NULL,                   -- negative context
-    creator     BIGINT   NOT NULL,                  -- creator, which is a foreign key
-    create_time DATETIME,                           -- create_time
-    update_time DATETIME,                           -- update_time
+    creator     BIGINT   NOT NULL,                  -- creator, which is a foreign key                       -- update_time
     PRIMARY KEY (id),
     FOREIGN KEY (creator) REFERENCES users (id)     -- link this table to users table
 );
 
--- set trigger
-CREATE TRIGGER before_insert_context
-    BEFORE INSERT
-    ON context
-    FOR EACH ROW SET NEW.create_time = NOW();
-
-CREATE TRIGGER before_update_context
-    BEFORE UPDATE
-    ON context
-    FOR EACH ROW SET NEW.update_time = NOW();
 
 -- create table context reference
 Create table context_reference(
