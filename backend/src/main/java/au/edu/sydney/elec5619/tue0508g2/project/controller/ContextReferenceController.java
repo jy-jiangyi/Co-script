@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(path="/contextreferences")
-public class ContextReference {
+public class ContextReferenceController {
 
     @Autowired
     private ContextReferenceRepository contextReferenceRepository;
