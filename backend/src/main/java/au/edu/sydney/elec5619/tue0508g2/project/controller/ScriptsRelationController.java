@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(path="/scriptsrelations")
-public class ScriptsRelation {
+public class ScriptsRelationController {
 
     @Autowired
     private ScriptsRelationRepository scriptsRelationRepository;
