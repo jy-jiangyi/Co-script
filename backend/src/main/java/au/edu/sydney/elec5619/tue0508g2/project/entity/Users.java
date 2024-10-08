@@ -17,7 +17,7 @@ public class Users {
 
     private String name;
 
-    private int role;
+    private String role;
 
     private String password_hash;
 
@@ -35,11 +35,15 @@ public class Users {
     public void setName(String name) {
         this.name = name;
     }
-    public void setRole(int role) {
+
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
         this.role = role;
     }
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+
+    public void setPassword_hash(String password_hash) { this.password_hash = password_hash;
     }
 
     public long getId() {
@@ -52,9 +56,6 @@ public class Users {
     public String getName() {
         return name;
     }
-    public int getRole() {
-        return role;
-    }
     public String getPassword_hash() {
         return password_hash;
     }
@@ -64,7 +65,11 @@ public class Users {
     public void setCreate_time(LocalDateTime create_time) {
         this.create_time = create_time;
     }
+
     public LocalDateTime getUpdate_time() {
         return update_time;
+    }
+    public void setUpdate_time(LocalDateTime update_time) {
+        this.update_time = update_time;
     }
 }
