@@ -7,5 +7,8 @@ get into /frontend-react.
 2. install react-router-dom@6 `npm install react-router-dom@6`
 3. install ant-design: Run `npm install antd --save`
 
-## 2 Run frontend
+## 2 update dependency
+`npm rebuild`
+
+## 3 Run frontend
 `npm run dev`
