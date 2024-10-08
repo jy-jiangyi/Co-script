@@ -1,6 +1,6 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
-import au.edu.sydney.elec5619.tue0508g2.project.app.SceneIllustrationGeneration;
+import au.edu.sydney.elec5619.tue0508g2.project.utils.SceneIllustrationGeneration;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import org.springframework.beans.factory.annotation.Autowired;

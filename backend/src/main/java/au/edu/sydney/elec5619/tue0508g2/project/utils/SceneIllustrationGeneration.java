@@ -1,4 +1,4 @@
-package au.edu.sydney.elec5619.tue0508g2.project.app;
+package au.edu.sydney.elec5619.tue0508g2.project.utils;
 
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIGeminiImpl;
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIOpenAIImpl;
