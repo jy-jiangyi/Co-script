@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Typography } from "antd";
+import { Form, Input, Button, Typography, Modal } from "antd";
 import { Link } from "react-router-dom";
+import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
@@ -12,11 +13,49 @@ const RegisterPage = () => {
     const [password_hash, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    // Handle Register Logic
+    // 状态管理，用于控制 Modal 的可见性和内容
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalContent, setModalContent] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalIcon, setModalIcon] = useState(null);
+
+    // 处理注册逻辑
     const handleRegister = async () => {
-        // Basic validation
+        // 初始化错误消息数组
+        const errors = [];
+
+        // 检查每个字段是否为空，并添加相应的错误消息
+        if (!email) {
+            errors.push("Email is required.");
+        }
+        if (!name) {
+            errors.push("Username is required.");
+        }
+        if (!role) {
+            errors.push("Role is required.");
+        }
+        if (!password_hash) {
+            errors.push("Password is required.");
+        }
+        if (!confirmPassword) {
+            errors.push("Confirm password is required.");
+        }
+
+        // 如果有错误，显示所有错误消息
+        if (errors.length > 0) {
+            setModalTitle('Missing Fields');
+            setModalContent(errors.join("\n"));
+            setModalIcon(<ExclamationCircleOutlined style={{ color: 'red', fontSize: 24 }} />);
+            setModalVisible(true);
+            return;
+        }
+
+        // 检查密码是否匹配
         if (password_hash !== confirmPassword) {
-            alert("Passwords do not match!");
+            setModalTitle('Mismatch Password');
+            setModalContent("Make sure confirm password and password is the same.");
+            setModalIcon(<ExclamationCircleOutlined style={{ color: 'red', fontSize: 24 }} />);
+            setModalVisible(true);
             return;
         }
 
@@ -30,16 +69,34 @@ const RegisterPage = () => {
         try {
             const response = await axios.post('/users/register', data);
             if (response.status === 201) {
-                console.log(response.status)
+                setModalTitle('Successfully Registered');
+                setModalContent("You can now login with this email.");
+                setModalIcon(<CheckCircleOutlined style={{ color: 'green', fontSize: 24 }} />);
+                setModalVisible(true);
                 // 注册成功，重定向到成功页面
-                window.location.href = '/#/login';
+                setTimeout(() => {
+                    window.location.href = '/#/login';
+                }, 2000); // 2秒后重定向
             } else if (response.status === 400) {
-                // 注册失败，重定向到错误页面
-                window.location.href = '/error';
+                setModalTitle('Error');
+                setModalContent("Registration failed.");
+                setModalIcon(<ExclamationCircleOutlined style={{ color: 'red', fontSize: 24 }} />);
+                setModalVisible(true);
             }
         } catch (error) {
-            console.error('Registration failed:', error);
-            alert("Registration failed! Please try again.");
+            if (error.response) {
+                const errorMessage = error.response.data; // 获取后端返回的错误消息
+                setModalTitle('Error');
+                setModalContent(errorMessage);
+                setModalIcon(<ExclamationCircleOutlined style={{ color: 'red', fontSize: 24 }} />);
+                setModalVisible(true);
+            } else {
+                console.error('Registration failed:', error);
+                setModalTitle('Registration Failed');
+                setModalContent("Please try again.");
+                setModalIcon(<ExclamationCircleOutlined style={{ color: 'red', fontSize: 24 }} />);
+                setModalVisible(true);
+            }
         }
     };
 
@@ -93,6 +150,21 @@ const RegisterPage = () => {
                     <Link to="/login">here</Link>
                 </Form.Item>
             </Form>
+
+            {/* Modal 用于展示错误和成功消息 */}
+            <Modal
+                title={modalTitle}
+                visible={modalVisible}
+                onOk={() => setModalVisible(false)}
+                onCancel={() => setModalVisible(false)}
+                okText="Done"
+            >
+                {/* 在内容中添加图标 */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {modalIcon}
+                    <p style={{ marginLeft: 8 }}>{modalContent}</p>
+                </div>
+            </Modal>
         </div>
     );
 };
