@@ -28,7 +28,7 @@ const RegisterPage = () => {
         };
 
         try {
-            const response = await axios.post('/api/register', data);
+            const response = await axios.post('/users/register', data);
             if (response.status === 201) {
                 console.log(response.status)
                 // 注册成功，重定向到成功页面
