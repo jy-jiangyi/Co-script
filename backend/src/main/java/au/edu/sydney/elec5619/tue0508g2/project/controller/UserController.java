@@ -26,6 +26,10 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Users user) {
 
+        if (usersRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Email already in use, please choose another one.");
+        }
         // hash password but do not write unill now
         user.setPassword_hash(user.getPassword_hash());
 
