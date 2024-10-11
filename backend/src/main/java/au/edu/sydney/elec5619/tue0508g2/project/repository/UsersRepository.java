@@ -5,4 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UsersRepository extends CrudRepository<Users, Long> {
 
+    // exists emails or not?
+    boolean existsByEmail(String email);
 }
