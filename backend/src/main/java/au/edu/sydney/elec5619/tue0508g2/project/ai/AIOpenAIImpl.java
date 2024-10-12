@@ -39,7 +39,7 @@ public class AIOpenAIImpl {
                 .bodyToMono(ImageGenerationResponse.class)
                 .map(response -> {
                     // 提取第一个生成的图像URL
-                    return response.getData().get(0).getUrl();
+                    return response.getData().getFirst().getUrl();
                 })
                 .onErrorResume(e -> {
                     // 错误处理
