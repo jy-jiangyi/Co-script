@@ -2,6 +2,7 @@ package au.edu.sydney.elec5619.tue0508g2.project.utils;
 
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIGeminiImpl;
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIOpenAIImpl;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AIImageRequestBody;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AITestRequestBody;
@@ -22,15 +23,12 @@ public class SceneIllustrationGeneration {
     private final AIOpenAIImpl aiOpenAI;
     private final ScriptScenesRepository scriptScenesRepository;
 
-    // 根据场景ID生成图像
+    // Generate image for a scene by its ID
     public Mono<String> generateSceneIllustrationBySceneId(Long sceneId) {
-        // 从数据库获取场景信息
-        return Mono.fromCallable(
-                        () -> {
-                            System.out.println("Fetching scene from database for ID: " + sceneId);
-                            return scriptScenesRepository.findById(sceneId).orElse(null);
-                        })
-//                .subscribeOn(Schedulers.boundedElastic())
+        return Mono.fromCallable(() -> {
+                    System.out.println("Fetching scene from database for ID: " + sceneId);
+                    return scriptScenesRepository.findById(sceneId).orElse(null);
+                })
                 .flatMap(scene -> {
                     if (scene != null) {
                         System.out.println("Scene found for ID: " + sceneId);
@@ -45,31 +43,85 @@ public class SceneIllustrationGeneration {
                 });
     }
 
-    // 根据剧本ID生成所有场景的图像
+    // Generate images for all scenes in a script
     public Mono<List<String>> generateSceneIllustrationsByScriptId(Long scriptId) {
-        // 从数据库获取所有场景信息
         return Mono.fromCallable(() -> scriptScenesRepository.findByScriptId(scriptId))
                 .flatMapMany(Flux::fromIterable)
-                .flatMap(this::generateSceneIllustration)
+                .concatMap(this::generateSceneIllustration) // Use concatMap to maintain order
                 .collectList();
     }
 
-    // 内部方法：生成单个场景的图像
-    private Mono<String> generateSceneIllustration(ScriptScenes scriptScenes) {
-        String sceneText = scriptScenes.getContent();
-        int sceneLength = sceneText.length();
+    // Internal method: Generate image for a single scene
+    private Mono<String> generateSceneIllustration(ScriptScenes currentScene) {
+        Script script = currentScene.getScript();
+        int currentSceneNumber = currentScene.getScene();
 
-        if (sceneLength < 3000) {
-            // 直接调用DALL·E生成图像
-            return generateImageWithDalle(sceneText);
+        // Fetch all previous scenes up to the current scene
+        return Mono.fromCallable(() -> scriptScenesRepository.findByScriptAndSceneLessThanOrderBySceneAsc(script, currentSceneNumber))
+                .flatMap(previousScenes -> {
+                    // Concatenate previous scenes' content
+                    StringBuilder previousContentBuilder = new StringBuilder();
+                    for (ScriptScenes scene : previousScenes) {
+                        previousContentBuilder.append(scene.getContent()).append("\n");
+                    }
+                    String previousContent = previousContentBuilder.toString();
+
+                    // Generate summary if needed
+                    return generateSummaryIfNeeded(previousContent)
+                            .flatMap(summary -> {
+                                // Combine summary and current scene content for the prompt
+                                String combinedPrompt = createImageGenerationPrompt(summary, currentScene.getContent());
+                                // Check length and generate image
+                                return generateImageWithPrompt(combinedPrompt);
+                            });
+                });
+    }
+
+    // Generate summary if text exceeds 3000 characters
+    private Mono<String> generateSummaryIfNeeded(String text) {
+        if (text.length() > 3000) {
+            // Text too long, generate summary
+            return summarizeText(text);
         } else {
-            // 先调用Gemini进行摘要，然后调用DALL·E
-            return summarizeSceneWithGemini(sceneText)
-                    .flatMap(this::generateImageWithDalle);
+            // Text length acceptable, return as is
+            return Mono.just(text);
         }
     }
 
-    // 调用DALL·E生成图像
+    // Call Gemini API to summarize text
+    private Mono<String> summarizeText(String text) {
+        String prompt = "Please provide a concise summary highlighting the main characters, settings, " +
+                "and elements relevant for image generation. The summary will be used as context for " +
+                "generating images of subsequent scenes.\n\n" + text;
+
+        AITestRequestBody requestBody = new AITestRequestBody();
+        requestBody.setPromot(prompt);
+
+        return aiGemini.textGeneration(requestBody);
+    }
+
+    // Create prompt for image generation by combining summary and current scene
+    private String createImageGenerationPrompt(String summary, String currentSceneContent) {
+        return "Use the following context to generate an image for the current scene. " +
+                "Note that the if Context Summary exists, only use it as a reference information. " +
+                "Do NOT generate the image for the scenes in the Context Summary.\n\n"
+                + "Context Summary:\n" + summary + "\n\n"
+                + "Current Scene Description:\n" + currentSceneContent;
+    }
+
+    // Generate image, summarizing the prompt if necessary
+    private Mono<String> generateImageWithPrompt(String prompt) {
+        if (prompt.length() > 3000) {
+            // Prompt too long, summarize
+            return summarizeText(prompt)
+                    .flatMap(this::generateImageWithDalle);
+        } else {
+            // Prompt length acceptable, generate image directly
+            return generateImageWithDalle(prompt);
+        }
+    }
+
+    // Call DALL·E API to generate image
     private Mono<String> generateImageWithDalle(String prompt) {
         AIImageRequestBody requestBody = new AIImageRequestBody();
         requestBody.setPrompt(prompt);
@@ -77,13 +129,5 @@ public class SceneIllustrationGeneration {
         requestBody.setSize("1024x1024");
 
         return aiOpenAI.imageGeneration(requestBody);
-    }
-
-    // 调用Gemini进行摘要
-    private Mono<String> summarizeSceneWithGemini(String sceneText) {
-        AITestRequestBody requestBody = new AITestRequestBody();
-        requestBody.setPromot("Please summarize the following scene to a short description suitable for image generation:\n" + sceneText);
-
-        return aiGemini.textGeneration(requestBody);
     }
 }
