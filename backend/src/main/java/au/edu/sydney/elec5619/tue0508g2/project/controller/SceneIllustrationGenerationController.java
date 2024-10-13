@@ -1,19 +1,27 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
-import au.edu.sydney.elec5619.tue0508g2.project.utils.SceneIllustrationGeneration;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
+import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
+import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
+import au.edu.sydney.elec5619.tue0508g2.project.utils.SceneIllustrationGeneration;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/scene_illustration_generation")
+@RequestMapping("/api/scene_illustration_generation")
 @RequiredArgsConstructor
 public class SceneIllustrationGenerationController {
 
     private final SceneIllustrationGeneration sceneIllustrationGeneration;
+    private final ScriptRepository scriptRepository;
+    private final ScriptScenesRepository scriptScenesRepository;
 
     // 生成单个场景的图像
     @PostMapping("/generate_scene_image")
@@ -25,5 +33,65 @@ public class SceneIllustrationGenerationController {
     @PostMapping("/generate_script_images")
     public Mono<List<String>> generateScriptImages(@RequestParam Long scriptId) {
         return sceneIllustrationGeneration.generateSceneIllustrationsByScriptId(scriptId);
+    }
+
+    @GetMapping("/get_details")
+    public Mono<ScriptDetailsDTO> getScriptDetails(@RequestParam Long scriptId) {
+        System.out.println("scriptId: " + scriptId);
+        return Mono.justOrEmpty(scriptRepository.findById(scriptId))
+                .flatMap(script -> {
+                    String scriptName = script.getName();
+                    List<SceneInfoDTO> scenes = scriptScenesRepository.findByScriptId(scriptId)
+                            .stream()
+                            .map(scene -> new SceneInfoDTO(scene.getScene(), scene.getTitle()))
+                            .collect(Collectors.toList());
+                    ScriptDetailsDTO dto = new ScriptDetailsDTO(scriptName, scenes);
+                    return Mono.just(dto);
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("Script not found")));
+    }
+//    {
+//        "scriptName": "My Awesome Script",
+//            "scenes": [
+//        {
+//            "scene": 1,
+//                "title": "Opening Scene"
+//        },
+//        {
+//            "scene": 2,
+//                "title": "The Conflict"
+//        }
+//        // More scenes...
+//  ]
+//    }
+
+
+    // DTO classes
+    @Setter
+    @Getter
+    public static class ScriptDetailsDTO {
+        // Getters and setters
+        private String scriptName;
+        private List<SceneInfoDTO> scenes;
+
+        public ScriptDetailsDTO(String scriptName, List<SceneInfoDTO> scenes) {
+            this.scriptName = scriptName;
+            this.scenes = scenes;
+        }
+
+    }
+
+    @Setter
+    @Getter
+    public static class SceneInfoDTO {
+        // Getters and setters
+        private int scene;
+        private String title;
+
+        public SceneInfoDTO(int scene, String title) {
+            this.scene = scene;
+            this.title = title;
+        }
+
     }
 }
