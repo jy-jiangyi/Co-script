@@ -20,6 +20,7 @@ function ProjectRoutes() {
             <Route path="/Login" element={<WelcomeLayout><LoginPage /></WelcomeLayout>}></Route>
             <Route path="/register" element={<WelcomeLayout><RegisterPage /></WelcomeLayout>}></Route>
             <Route path="/context" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
+            <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
         </Routes>
