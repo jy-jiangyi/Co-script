@@ -8,5 +8,8 @@ get into /frontend-react.
 3. install ant-design: Run `npm install antd --save`
 4. `npm rebuild`
 
-## 2 Run frontend
+## 2 update dependency
+`npm rebuild`
+
+## 3 Run frontend
 `npm run dev`
