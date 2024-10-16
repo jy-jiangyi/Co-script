@@ -9,5 +9,8 @@ get into /frontend-react.
 4. install icons package: Run `npm install ant-design-icons --save`
 5. `npm rebuild`
 
-## 2 Run frontend
+## 2 update dependency
+`npm rebuild`
+
+## 3 Run frontend
 `npm run dev`

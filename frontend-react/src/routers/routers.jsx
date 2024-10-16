@@ -22,6 +22,7 @@ function ProjectRoutes() {
             <Route path="/register" element={<WelcomeLayout><RegisterPage /></WelcomeLayout>}></Route>
             <Route path="/context" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             <Route path="/scene_illustration" element={<CommonLayout><SceneIllustrationGenerationPage /></CommonLayout>}></Route>
+            <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
         </Routes>
