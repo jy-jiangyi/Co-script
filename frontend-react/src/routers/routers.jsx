@@ -10,6 +10,7 @@ import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
+import SceneIllustrationGenerationPage from "../pages/SceneIllustrationGenerationPage.jsx";
 
 function ProjectRoutes() {
     return (
@@ -20,6 +21,7 @@ function ProjectRoutes() {
             <Route path="/Login" element={<WelcomeLayout><LoginPage /></WelcomeLayout>}></Route>
             <Route path="/register" element={<WelcomeLayout><RegisterPage /></WelcomeLayout>}></Route>
             <Route path="/context" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
+            <Route path="/scene_illustration" element={<CommonLayout><SceneIllustrationGenerationPage /></CommonLayout>}></Route>
             <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}

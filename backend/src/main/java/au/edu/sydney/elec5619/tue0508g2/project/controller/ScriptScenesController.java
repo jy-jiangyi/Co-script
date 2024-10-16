@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path="/script_scenes")
+@RequestMapping(path="/api/script_scenes")
 public class ScriptScenesController {
 
     @Autowired
