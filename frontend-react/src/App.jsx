@@ -5,12 +5,15 @@ import './App.css'
 
 import {HashRouter} from "react-router-dom";
 import ProjectRoutes from "./routers/routers.jsx";
+import {ScriptProvider} from "./hooks/ScriptContext.jsx";
 
 function App() {
 
     return (
         <HashRouter>
-            <ProjectRoutes/>
+            <ScriptProvider>
+                <ProjectRoutes/>
+            </ScriptProvider>
         </HashRouter>
     )
 }

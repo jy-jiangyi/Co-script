@@ -35,6 +35,7 @@ public class SceneIllustrationGenerationController {
         return sceneIllustrationGeneration.generateSceneIllustrationsByScriptId(scriptId);
     }
 
+    // 页面初始化
     @GetMapping("/get_details")
     public Mono<ScriptDetailsDTO> getScriptDetails(@RequestParam Long scriptId) {
         System.out.println("scriptId: " + scriptId);

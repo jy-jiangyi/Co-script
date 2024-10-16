@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Breadcrumb, Button, Layout, List, Card, Image, Typography, Row, Col } from 'antd';
 import { HomeOutlined, FileTextOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
+import {ScriptContext} from "../hooks/ScriptContext.jsx";
 
 import '../styles/SceneIllustrationGeneration.css';
 
@@ -104,6 +105,7 @@ function SceneIllustrationGenerationPage() {
     const scriptId = 1;
     const [scriptName, setScriptName] = useState('');
     const [scenes, setScenes] = useState([]);
+    // const { scriptId } = useContext(ScriptContext);
 
     useEffect(() => {
         // 使用 axios 从 API 获取数据，发送 scriptId 作为请求参数
