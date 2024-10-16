@@ -24,13 +24,13 @@ public class SceneIllustrationGenerationController {
     private final ScriptScenesRepository scriptScenesRepository;
 
     // 生成单个场景的图像
-    @PostMapping("/generate_scene_image")
+    @GetMapping("/generate_scene_image")
     public Mono<String> generateSceneImage(@RequestParam Long sceneId) {
         return sceneIllustrationGeneration.generateSceneIllustrationBySceneId(sceneId);
     }
 
     // 生成整个剧本的所有场景图像
-    @PostMapping("/generate_script_images")
+    @GetMapping("/generate_script_images")
     public Mono<List<String>> generateScriptImages(@RequestParam Long scriptId) {
         return sceneIllustrationGeneration.generateSceneIllustrationsByScriptId(scriptId);
     }
@@ -44,7 +44,7 @@ public class SceneIllustrationGenerationController {
                     String scriptName = script.getName();
                     List<SceneInfoDTO> scenes = scriptScenesRepository.findByScriptId(scriptId)
                             .stream()
-                            .map(scene -> new SceneInfoDTO(scene.getScene(), scene.getTitle()))
+                            .map(scene -> new SceneInfoDTO(scene.getId(), scene.getScene(), scene.getTitle()))
                             .collect(Collectors.toList());
                     ScriptDetailsDTO dto = new ScriptDetailsDTO(scriptName, scenes);
                     return Mono.just(dto);
@@ -86,10 +86,12 @@ public class SceneIllustrationGenerationController {
     @Getter
     public static class SceneInfoDTO {
         // Getters and setters
+        private Long id;
         private int scene;
         private String title;
 
-        public SceneInfoDTO(int scene, String title) {
+        public SceneInfoDTO(Long id, int scene, String title) {
+            this.id = id;
             this.scene = scene;
             this.title = title;
         }
