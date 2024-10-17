@@ -35,51 +35,27 @@ public class Context {
 
     // Getters and Setters
 
-    public long getId() {
-        return id;
-    }
+    public long getId() {return id;}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public void setId(long id) {this.id = id;}
 
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() {return title;}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public void setTitle(String title) {this.title = title;}
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() {return description;}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setDescription(String description) {this.description = description;}
 
-    public String getPositive() {
-        return positive;
-    }
+    public String getPositive() {return positive;}
 
-    public void setPositive(String positive) {
-        this.positive = positive;
-    }
+    public void setPositive(String positive) {this.positive = positive;}
 
-    public String getNegative() {
-        return negative;
-    }
+    public String getNegative() {return negative;}
 
-    public void setNegative(String negative) {
-        this.negative = negative;
-    }
+    public void setNegative(String negative) {this.negative = negative;}
 
-    public Users getCreator() {
-        return creator;
-    }
+    public Users getCreator() {return creator;}
 
-    public void setCreator(Users creator) {
-        this.creator = creator;
-    }
+    public void setCreator(Users creator) {this.creator = creator;}
 }
