@@ -113,7 +113,7 @@ public class ScriptScenes {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-
+    //场次
     private int scene;
 
     private String content;
@@ -128,8 +128,4 @@ public class ScriptScenes {
     @JoinColumn(name = "script_id")
     private Script script;
 
-    // 如果有需要保留的自定义方法，可以继续保留
-    // public void customMethod() {
-    //     // 方法体
-    // }
 }
