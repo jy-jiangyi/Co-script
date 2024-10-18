@@ -16,11 +16,11 @@ const API_ENDPOINT='/api/scene_illustration_generation';
 function BreadcrumbNav() {
     return (
         <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item href="">
+            <Breadcrumb.Item href="#/home">
                 <HomeOutlined />
                 <span>Home</span>
             </Breadcrumb.Item>
-            <Breadcrumb.Item href="">
+            <Breadcrumb.Item href="#/script_editing">
                 <FileTextOutlined />
                 <span>Script Editing</span>
             </Breadcrumb.Item>
