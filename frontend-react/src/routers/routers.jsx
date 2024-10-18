@@ -11,6 +11,7 @@ import RegisterPage from "../pages/RegisterPage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
 import SceneIllustrationGenerationPage from "../pages/SceneIllustrationGenerationPage.jsx";
+import ScriptEditingPage from "../pages/ScriptEditingPage.jsx"
 
 function ProjectRoutes() {
     return (
@@ -23,6 +24,7 @@ function ProjectRoutes() {
             <Route path="/context" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             <Route path="/scene_illustration" element={<CommonLayout><SceneIllustrationGenerationPage /></CommonLayout>}></Route>
             <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
+            <Route path="/script_editing" element={<CommonLayout><ScriptEditingPage /></CommonLayout>}></Route>
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
             {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
         </Routes>
