@@ -1,12 +1,12 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
-import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
+import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptGeneration;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +15,58 @@ import java.util.Optional;
 @RequestMapping(path = "/scripts")
 public class ScriptsController {
 
+    private final ScriptRepository scriptRepository;
+    private final ScriptGeneration scriptGeneration;
+
     @Autowired
-    private ScriptRepository scriptRepository;
+    public ScriptsController(ScriptRepository scriptRepository, ScriptGeneration scriptGeneration) {
+        this.scriptRepository = scriptRepository;
+        this.scriptGeneration = scriptGeneration;
+    }
 
-    // get specific scene
+    // generate
+    @PostMapping("/generate")
+    public Mono<String> generateScript(@RequestParam String name,
+                                       @RequestParam List<String> contextList,
+                                       @RequestParam String positive,
+                                       @RequestParam String negative) {
 
-    // 调AI生成Script
+        return scriptGeneration.generateScript(name, contextList, positive, negative);
+    }
+
+    // emulate
+    @PostMapping("/emulate")
+    public Mono<String> emulateScript(@RequestParam String name,
+                                      @RequestParam List<String> contextList,
+                                      @RequestParam String positive,
+                                      @RequestParam String negative,
+                                      @RequestParam String existingScript) {
+
+        return scriptGeneration.emulateScript(name, contextList, positive, negative, existingScript);
+    }
+
+    // rewrite
+    @PostMapping("/rewrite")
+    public Mono<String> rewriteScript(@RequestParam String name,
+                                      @RequestParam List<String> contextList,
+                                      @RequestParam String positive,
+                                      @RequestParam String negative,
+                                      @RequestParam String existingScript) {
+
+        return scriptGeneration.rewriteScript(name, contextList, positive, negative, existingScript);
+    }
+
+    // translate
+    @PostMapping("/translate")
+    public Mono<String> translateScript(@RequestParam String name,
+                                        @RequestParam List<String> contextList,
+                                        @RequestParam String positive,
+                                        @RequestParam String negative,
+                                        @RequestParam String existingScript,
+                                        @RequestParam String language) {
+
+        return scriptGeneration.translateScript(name, contextList, positive, negative, existingScript, language);
+    }
 
     // save AI生成的Script
 
