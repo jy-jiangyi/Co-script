@@ -67,6 +67,8 @@ CREATE TABLE script_scenes
     FOREIGN KEY (script_id) REFERENCES scripts (id) -- link this table to script table
 );
 
+ALTER TABLE script_scenes MODIFY content MEDIUMTEXT;
+
 -- 创建 before insert 触发器，设置 create_time
 CREATE TRIGGER before_insert_script_scenes
     BEFORE INSERT
