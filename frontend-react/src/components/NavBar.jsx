@@ -1,25 +1,18 @@
 import React from 'react';
 import {Menu} from 'antd';
-
-const items1 = ['1', '2', '3'].map((key) => ({
-    key,
-    label: `nav ${key}`,
-}));
+import { Link } from 'react-router-dom';
 
 const NavBar = () => {
     return (
-        <Menu
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={['2']}
-            items={items1}
-            style={{
-                flex: 1,
-                minWidth: 0,
-            }}
-        />
-    )
-        ;
+        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
+            <Menu.Item key="1">
+                <Link to="/home">Home</Link>
+            </Menu.Item>
+            <Menu.Item key="2">
+                <Link to="/context">Context Management</Link>
+            </Menu.Item>
+        </Menu>
+    );
 };
 
 export default NavBar;
