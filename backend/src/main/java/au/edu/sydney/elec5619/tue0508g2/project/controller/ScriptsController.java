@@ -88,16 +88,17 @@ public class ScriptsController {
         }
     }
 
+    // 根据 scriptId 获取所有场景
     @GetMapping("/{id}/scenes")
     public ResponseEntity<List<ScriptScenesDTO>> getScenesByScriptId(@PathVariable("id") Long scriptId) {
         List<ScriptScenes> scenes = scriptScenesRepository.findByScriptId(scriptId);
 
         // 将 ScriptScenes 转换为 ScriptScenesDTO
         List<ScriptScenesDTO> sceneDTOs = scenes.stream()
-                .map(scene -> new ScriptScenesDTO(scene.getId(), scene.getTitle()))
+                .map(scene -> new ScriptScenesDTO(scene.getScene(), scene.getTitle(), scene.getContent())) // 确保传递所有字段
                 .collect(Collectors.toList());
 
-        return new ResponseEntity<>(sceneDTOs, HttpStatus.OK);
+        return ResponseEntity.ok(sceneDTOs); // 返回 200 OK 和 DTO 列表
     }
 
 }
