@@ -1,8 +1,13 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
+import au.edu.sydney.elec5619.tue0508g2.project.dto.ScriptScenesDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptGeneration;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
+import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/scripts")
@@ -18,12 +24,17 @@ public class ScriptsController {
 
     private final ScriptRepository scriptRepository;
     private final ScriptGeneration scriptGeneration;
+    private final ScriptScenesRepository scriptScenesRepository;
 
     @Autowired
-    public ScriptsController(ScriptRepository scriptRepository, ScriptGeneration scriptGeneration) {
+    public ScriptsController(ScriptRepository scriptRepository, ScriptGeneration scriptGeneration, ScriptScenesRepository scriptScenesRepository) {
         this.scriptRepository = scriptRepository;
         this.scriptGeneration = scriptGeneration;
+        this.scriptScenesRepository = scriptScenesRepository;
     }
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     // generate
     @PostMapping("/generate")
@@ -82,6 +93,18 @@ public class ScriptsController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}/scenes")
+    public ResponseEntity<List<ScriptScenesDTO>> getScenesByScriptId(@PathVariable("id") Long scriptId) {
+        List<ScriptScenes> scenes = scriptScenesRepository.findByScriptId(scriptId);
+
+        // 将 ScriptScenes 转换为 ScriptScenesDTO
+        List<ScriptScenesDTO> sceneDTOs = scenes.stream()
+                .map(scene -> new ScriptScenesDTO(scene.getId(), scene.getTitle()))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(sceneDTOs, HttpStatus.OK);
     }
 
 }
