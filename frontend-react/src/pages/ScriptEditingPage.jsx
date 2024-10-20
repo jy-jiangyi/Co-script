@@ -25,8 +25,6 @@ const ScriptDemo1 = () => {
 
   const location = useLocation();
 
-  const { TabPane } = Tabs;
-
   const StyledTabs = styled(Tabs)`
     .ant-tabs-nav::before {
       border-bottom: none;
@@ -48,33 +46,29 @@ const ScriptDemo1 = () => {
   `;
 
   const NavigationBar = () => {
+    const tabItems = [
+      { key: 'character', label: 'Character' },
+      { key: 'parenthetical', label: 'Parenthetical' },
+      { key: 'dialogue', label: 'Dialogue' },
+      { key: 'transition', label: 'Transition' },
+      { key: 'general', label: 'General' },
+      { key: 'action', label: 'Action' },
+      { key: 'editing', label: 'Editing' },
+      {
+        key: 'scene-illustration',
+        label: (
+          <Link to="/scene_illustration">
+            <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
+              Scene Illustration
+            </Button>
+          </Link>
+        ),
+      },
+      { key: 'all-continuation', label: 'All Continuation' },
+    ];
+  
     return (
-      <StyledTabs defaultActiveKey="character" centered>
-        <TabPane tab="Character" key="character" />
-        <TabPane tab="Parenthetical" key="parenthetical" />
-        <TabPane tab="Dialogue" key="dialogue" />
-        <TabPane tab="Transition" key="transition" />
-        <TabPane tab="General" key="general" />
-        <TabPane tab="Action" key="action" />
-        <TabPane tab="Editing" key="editing" />
-        <TabPane
-          tab={
-            <div>
-              <Link to="/scene_illustration">
-                <Button
-                  type="primary"
-                  size="small"
-                  style={{ marginLeft: "2px" }}
-                >
-                  Scene Illustration
-                </Button>
-              </Link>
-            </div>
-          }
-          key="scene-illustration"
-        />
-        <TabPane tab="All Continuation" key="all-continuation" />
-      </StyledTabs>
+      <StyledTabs defaultActiveKey="character" centered items={tabItems} />
     );
   };
 
