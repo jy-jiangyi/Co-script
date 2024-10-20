@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Menu, Layout, Breadcrumb, theme } from 'antd';
-import { Link, Navigate } from 'react-router-dom'; // 导入 Navigate
+import { Link, Navigate, useLocation } from 'react-router-dom'; // 导入 useLocation
 import { HomeOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Tabs, Button } from 'antd';
@@ -14,7 +14,10 @@ const ScriptDemo1 = () => {
   } = theme.useToken();
 
   const [scriptName, setScriptName] = useState(null);
+  const [scenes, setScenes] = useState([]); // 用于存储场景数据
   const [redirect, setRedirect] = useState(false); // 用于重定向的状态
+
+  const location = useLocation(); // 获取 location 对象
 
   const { TabPane } = Tabs;
 
@@ -40,43 +43,53 @@ const ScriptDemo1 = () => {
 
   const NavigationBar = () => {
     return (
-      <StyledTabs defaultActiveKey="character" centered>
-        <TabPane tab="Character" key="character" />
-        <TabPane tab="Parenthetical" key="parenthetical" />
-        <TabPane tab="Dialogue" key="dialogue" />
-        <TabPane tab="Transition" key="transition" />
-        <TabPane tab="General" key="general" />
-        <TabPane tab="Action" key="action" />
-        <TabPane tab="Editing" key="editing" />
-        <TabPane
-          tab={
-            <div>
-              <Link to="/scene_illustration">
-                <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
-                  Scene Illustration
-                </Button>
-              </Link>
-            </div>
-          }
-          key="scene-illustration"
-        />
-        <TabPane tab="All Continuation" key="all-continuation" />
-      </StyledTabs>
+        <StyledTabs defaultActiveKey="character" centered>
+            <TabPane tab="Character" key="character" />
+            <TabPane tab="Parenthetical" key="parenthetical" />
+            <TabPane tab="Dialogue" key="dialogue" />
+            <TabPane tab="Transition" key="transition" />
+            <TabPane tab="General" key="general" />
+            <TabPane tab="Action" key="action" />
+            <TabPane tab="Editing" key="editing" />
+            <TabPane
+                tab={
+                <div>
+                    <Link to="/scene_illustration">
+                        <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
+                            Scene Illustration
+                        </Button>
+                    </Link>
+                </div>
+            }
+            key="scene-illustration"
+            />
+            <TabPane tab="All Continuation" key="all-continuation" />
+        </StyledTabs>
     );
   };
 
   useEffect(() => {
-    const fetchScript = async () => {
-      try {
-        const response = await axios.get('/scripts/1'); // 替换为实际的 API 端点
-        setScriptName(response.data);
-      } catch (error) {
-        console.error(error);
+    const fetchScriptAndScenes = async () => {
+      const params = new URLSearchParams(location.search);
+      const scriptId = params.get('id'); // 获取 id 参数
+
+      if (scriptId) {
+        try {
+          // Fetch script
+          const scriptResponse = await axios.get(`/scripts/${scriptId}`);
+          setScriptName(scriptResponse.data);
+
+          // Fetch scenes
+          const scenesResponse = await axios.get(`/scripts/${scriptId}/scenes`);
+          setScenes(scenesResponse.data);
+        } catch (error) {
+          console.error(error);
+        }
       }
     };
 
-    fetchScript();
-  }, []);
+    fetchScriptAndScenes();
+  }, [location.search]); // 依赖于 location.search
 
   // 如果需要重定向，设置 redirect 为 true
   const handleRedirect = () => {
@@ -84,7 +97,7 @@ const ScriptDemo1 = () => {
   };
 
   if (redirect) {
-    return <Navigate to="/scene_illustration" />; // 使用 Navigate 进行重定向
+    return <Navigate to="/scene_illustration" />;
   }
 
   return (
@@ -102,23 +115,15 @@ const ScriptDemo1 = () => {
           <p>Script short summary</p>
         </div>
         <Layout>
-          <Sider
-            width={200}
-            style={{
-              background: colorBgContainer,
-            }}
-          >
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={['1']}
-              style={{ height: '100%', borderRight: 0 }}
-            >
-              <Menu.Item key="1">Scene 1</Menu.Item>
-              <Menu.Item key="2">Scene 2</Menu.Item>
-              <Menu.Item key="3">Scene 3</Menu.Item>
-              <Menu.Item key="4">Scene 4</Menu.Item>
+        <Sider width={200} style={{ background: colorBgContainer }}>
+            <Menu mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
+                {scenes.map((scene) => (
+                <Menu.Item key={scene.id}> {/* 使用 scene.id 作为 key */}
+                    Scene {scene.id}: {scene.title} {/* 显示场景的 ID 和标题 */}
+                </Menu.Item>
+                ))}
             </Menu>
-          </Sider>
+        </Sider>
 
           <Content
             style={{
