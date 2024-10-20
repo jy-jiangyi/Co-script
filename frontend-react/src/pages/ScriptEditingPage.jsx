@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Menu, Layout, Breadcrumb, theme } from 'antd';
-import { Link, Navigate, useLocation } from 'react-router-dom'; // 导入 useLocation
-import { HomeOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
-import { Tabs, Button } from 'antd';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Menu, Layout, Breadcrumb, theme } from "antd";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { HomeOutlined } from "@ant-design/icons";
+import styled from "styled-components";
+import { Tabs, Button } from "antd";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/atom-one-dark.css";
 
 const { Header, Content, Sider } = Layout;
 
@@ -14,10 +19,11 @@ const ScriptDemo1 = () => {
   } = theme.useToken();
 
   const [scriptName, setScriptName] = useState(null);
-  const [scenes, setScenes] = useState([]); // 用于存储场景数据
-  const [redirect, setRedirect] = useState(false); // 用于重定向的状态
+  const [scenes, setScenes] = useState([]);
+  const [selectedScene, setSelectedScene] = useState(null);
+  const [redirect, setRedirect] = useState(false);
 
-  const location = useLocation(); // 获取 location 对象
+  const location = useLocation();
 
   const { TabPane } = Tabs;
 
@@ -43,43 +49,45 @@ const ScriptDemo1 = () => {
 
   const NavigationBar = () => {
     return (
-        <StyledTabs defaultActiveKey="character" centered>
-            <TabPane tab="Character" key="character" />
-            <TabPane tab="Parenthetical" key="parenthetical" />
-            <TabPane tab="Dialogue" key="dialogue" />
-            <TabPane tab="Transition" key="transition" />
-            <TabPane tab="General" key="general" />
-            <TabPane tab="Action" key="action" />
-            <TabPane tab="Editing" key="editing" />
-            <TabPane
-                tab={
-                <div>
-                    <Link to="/scene_illustration">
-                        <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
-                            Scene Illustration
-                        </Button>
-                    </Link>
-                </div>
-            }
-            key="scene-illustration"
-            />
-            <TabPane tab="All Continuation" key="all-continuation" />
-        </StyledTabs>
+      <StyledTabs defaultActiveKey="character" centered>
+        <TabPane tab="Character" key="character" />
+        <TabPane tab="Parenthetical" key="parenthetical" />
+        <TabPane tab="Dialogue" key="dialogue" />
+        <TabPane tab="Transition" key="transition" />
+        <TabPane tab="General" key="general" />
+        <TabPane tab="Action" key="action" />
+        <TabPane tab="Editing" key="editing" />
+        <TabPane
+          tab={
+            <div>
+              <Link to="/scene_illustration">
+                <Button
+                  type="primary"
+                  size="small"
+                  style={{ marginLeft: "2px" }}
+                >
+                  Scene Illustration
+                </Button>
+              </Link>
+            </div>
+          }
+          key="scene-illustration"
+        />
+        <TabPane tab="All Continuation" key="all-continuation" />
+      </StyledTabs>
     );
   };
 
   useEffect(() => {
     const fetchScriptAndScenes = async () => {
       const params = new URLSearchParams(location.search);
-      const scriptId = params.get('id'); // 获取 id 参数
+      const scriptId = params.get("id");
 
       if (scriptId) {
         try {
-          // Fetch script
           const scriptResponse = await axios.get(`/scripts/${scriptId}`);
           setScriptName(scriptResponse.data);
 
-          // Fetch scenes
           const scenesResponse = await axios.get(`/scripts/${scriptId}/scenes`);
           setScenes(scenesResponse.data);
         } catch (error) {
@@ -89,9 +97,8 @@ const ScriptDemo1 = () => {
     };
 
     fetchScriptAndScenes();
-  }, [location.search]); // 依赖于 location.search
+  }, [location.search]);
 
-  // 如果需要重定向，设置 redirect 为 true
   const handleRedirect = () => {
     setRedirect(true);
   };
@@ -102,8 +109,8 @@ const ScriptDemo1 = () => {
 
   return (
     <Layout>
-      <Content style={{ padding: '0 48px' }}>
-        <Breadcrumb style={{ margin: '16px 0' }}>
+      <Content style={{ padding: "0 48px" }}>
+        <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item href="#/home">
             <HomeOutlined />
             <span>Home</span>
@@ -115,15 +122,22 @@ const ScriptDemo1 = () => {
           <p>Script short summary</p>
         </div>
         <Layout>
-        <Sider width={200} style={{ background: colorBgContainer }}>
-            <Menu mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
-                {scenes.map((scene) => (
-                <Menu.Item key={scene.id}> {/* 使用 scene.id 作为 key */}
-                    Scene {scene.id}: {scene.title} {/* 显示场景的 ID 和标题 */}
+          <Sider width={200} style={{ background: colorBgContainer }}>
+            <Menu
+              mode="inline"
+              defaultSelectedKeys={["1"]}
+              style={{ height: "100%", borderRight: 0 }}
+            >
+              {scenes.map((scene) => (
+                <Menu.Item
+                  key={scene.id}
+                  onClick={() => setSelectedScene(scene)}
+                >
+                  Scene {scene.id}: {scene.title}
                 </Menu.Item>
-                ))}
+              ))}
             </Menu>
-        </Sider>
+          </Sider>
 
           <Content
             style={{
@@ -135,6 +149,29 @@ const ScriptDemo1 = () => {
             }}
           >
             <NavigationBar />
+            {selectedScene && (
+              <div>
+                <h2>{selectedScene.title}</h2>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                  components={{
+                    code({ node, inline, className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      return !inline && match ? (
+                        <pre data-language={match[1]}>
+                          <code {...props}>{children}</code>
+                        </pre>
+                      ) : (
+                        <code {...props}>{children}</code>
+                      );
+                    },
+                  }}
+                >
+                  {selectedScene.content}
+                </ReactMarkdown>
+              </div>
+            )}
           </Content>
         </Layout>
       </Content>
