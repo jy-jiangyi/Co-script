@@ -1,5 +1,6 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
+import au.edu.sydney.elec5619.tue0508g2.project.utils.SceneIllustrationGeneration;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path="/script_scenes")
+@RequestMapping(path="/api/script_scenes")
 public class ScriptScenesController {
 
     @Autowired
     private ScriptScenesRepository scriptScenesRepository;
+//    private SceneIllustrationGeneration sceneIllustrationGeneration;
 
     // get all scene in a script_id
     @GetMapping(path="/script/{scriptId}")
@@ -54,4 +56,7 @@ public class ScriptScenesController {
         scriptScenesRepository.deleteById(id);
         return "Deleted";
     }
+
+
+
 }

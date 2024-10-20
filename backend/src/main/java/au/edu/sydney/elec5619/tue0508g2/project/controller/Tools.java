@@ -1,7 +1,8 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
-
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIGeminiImpl;
+import au.edu.sydney.elec5619.tue0508g2.project.ai.AIOpenAIImpl;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AITestRequestBody;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AIImageRequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 public class Tools {
 
     private final AIGeminiImpl aiGemini;
+    private final AIOpenAIImpl aiOpenAI;
 
     @GetMapping("/about")
     public String about(@RequestParam(value = "group") String group) {
@@ -36,6 +38,10 @@ public class Tools {
     }
 
 
+    @PostMapping("/ai_image_test")
+    public Mono<String> aiImageTest(@RequestBody AIImageRequestBody body) {
+        return aiOpenAI.imageGeneration(body);
+    }
 
 
 }
