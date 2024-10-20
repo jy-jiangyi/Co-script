@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Menu, Layout, Breadcrumb, theme } from 'antd';
-import { Link, Navigate } from 'react-router-dom'; // 导入 Navigate
-import { HomeOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
-import { Tabs, Button } from 'antd';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Menu, Layout, Breadcrumb, theme } from "antd";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { HomeOutlined } from "@ant-design/icons";
+import styled from "styled-components";
+import { Tabs, Button } from "antd";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/atom-one-dark.css";
 
 const { Header, Content, Sider } = Layout;
 
@@ -14,9 +19,11 @@ const ScriptDemo1 = () => {
   } = theme.useToken();
 
   const [scriptName, setScriptName] = useState(null);
-  const [redirect, setRedirect] = useState(false); // 用于重定向的状态
+  const [scenes, setScenes] = useState([]);
+  const [selectedScene, setSelectedScene] = useState(null);
+  const [redirect, setRedirect] = useState(false);
 
-  const { TabPane } = Tabs;
+  const location = useLocation();
 
   const StyledTabs = styled(Tabs)`
     .ant-tabs-nav::before {
@@ -39,58 +46,65 @@ const ScriptDemo1 = () => {
   `;
 
   const NavigationBar = () => {
+    const tabItems = [
+      { key: 'character', label: 'Character' },
+      { key: 'parenthetical', label: 'Parenthetical' },
+      { key: 'dialogue', label: 'Dialogue' },
+      { key: 'transition', label: 'Transition' },
+      { key: 'general', label: 'General' },
+      { key: 'action', label: 'Action' },
+      { key: 'editing', label: 'Editing' },
+      {
+        key: 'scene-illustration',
+        label: (
+          <Link to="/scene_illustration">
+            <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
+              Scene Illustration
+            </Button>
+          </Link>
+        ),
+      },
+      { key: 'all-continuation', label: 'All Continuation' },
+    ];
+  
     return (
-      <StyledTabs defaultActiveKey="character" centered>
-        <TabPane tab="Character" key="character" />
-        <TabPane tab="Parenthetical" key="parenthetical" />
-        <TabPane tab="Dialogue" key="dialogue" />
-        <TabPane tab="Transition" key="transition" />
-        <TabPane tab="General" key="general" />
-        <TabPane tab="Action" key="action" />
-        <TabPane tab="Editing" key="editing" />
-        <TabPane
-          tab={
-            <div>
-              <Link to="/scene_illustration">
-                <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
-                  Scene Illustration
-                </Button>
-              </Link>
-            </div>
-          }
-          key="scene-illustration"
-        />
-        <TabPane tab="All Continuation" key="all-continuation" />
-      </StyledTabs>
+      <StyledTabs defaultActiveKey="character" centered items={tabItems} />
     );
   };
 
   useEffect(() => {
-    const fetchScript = async () => {
-      try {
-        const response = await axios.get('/scripts/1'); // 替换为实际的 API 端点
-        setScriptName(response.data);
-      } catch (error) {
-        console.error(error);
+    const fetchScriptAndScenes = async () => {
+      const params = new URLSearchParams(location.search);
+      const scriptId = params.get("id");
+
+      if (scriptId) {
+        try {
+          const scriptResponse = await axios.get(`/scripts/${scriptId}`);
+          setScriptName(scriptResponse.data);
+
+          const scenesResponse = await axios.get(`/scripts/${scriptId}/scenes`);
+          setScenes(scenesResponse.data);
+        } catch (error) {
+          console.error(error);
+        }
       }
     };
 
-    fetchScript();
-  }, []);
+    fetchScriptAndScenes();
+  }, [location.search]);
 
-  // 如果需要重定向，设置 redirect 为 true
   const handleRedirect = () => {
     setRedirect(true);
   };
 
   if (redirect) {
-    return <Navigate to="/scene_illustration" />; // 使用 Navigate 进行重定向
+    return <Navigate to="/scene_illustration" />;
   }
 
   return (
     <Layout>
-      <Content style={{ padding: '0 48px' }}>
-        <Breadcrumb style={{ margin: '16px 0' }}>
+      <Content style={{ padding: "0 48px" }}>
+        <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item href="#/home">
             <HomeOutlined />
             <span>Home</span>
@@ -102,21 +116,20 @@ const ScriptDemo1 = () => {
           <p>Script short summary</p>
         </div>
         <Layout>
-          <Sider
-            width={200}
-            style={{
-              background: colorBgContainer,
-            }}
-          >
+          <Sider width={200} style={{ background: colorBgContainer }}>
             <Menu
               mode="inline"
-              defaultSelectedKeys={['1']}
-              style={{ height: '100%', borderRight: 0 }}
+              defaultSelectedKeys={["1"]}
+              style={{ height: "100%", borderRight: 0 }}
             >
-              <Menu.Item key="1">Scene 1</Menu.Item>
-              <Menu.Item key="2">Scene 2</Menu.Item>
-              <Menu.Item key="3">Scene 3</Menu.Item>
-              <Menu.Item key="4">Scene 4</Menu.Item>
+              {scenes.map((scene) => (
+                <Menu.Item
+                  key={scene.id}
+                  onClick={() => setSelectedScene(scene)}
+                >
+                  Scene {scene.id}: {scene.title}
+                </Menu.Item>
+              ))}
             </Menu>
           </Sider>
 
@@ -130,6 +143,29 @@ const ScriptDemo1 = () => {
             }}
           >
             <NavigationBar />
+            {selectedScene && (
+              <div>
+                <h2>{selectedScene.title}</h2>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                  components={{
+                    code({ node, inline, className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      return !inline && match ? (
+                        <pre data-language={match[1]}>
+                          <code {...props}>{children}</code>
+                        </pre>
+                      ) : (
+                        <code {...props}>{children}</code>
+                      );
+                    },
+                  }}
+                >
+                  {selectedScene.content}
+                </ReactMarkdown>
+              </div>
+            )}
           </Content>
         </Layout>
       </Content>
