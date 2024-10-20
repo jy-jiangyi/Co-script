@@ -8,10 +8,10 @@ import lombok.Setter;
 public class ScriptScenesDTO {
 
     private Long id;
-    private String content;
+    private String title;
 
     public ScriptScenesDTO(Long id, String content) {
         this.id = id;
-        this.content = content;
+        this.title = content;
     }
 }
