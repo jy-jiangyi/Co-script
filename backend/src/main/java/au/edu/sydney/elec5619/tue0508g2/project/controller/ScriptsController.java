@@ -3,11 +3,8 @@ package au.edu.sydney.elec5619.tue0508g2.project.controller;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.ScriptScenesDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptGeneration;
-import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
-import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,9 +28,6 @@ public class ScriptsController {
         this.scriptGeneration = scriptGeneration;
         this.scriptScenesRepository = scriptScenesRepository;
     }
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     // generate
     @PostMapping("/generate")
