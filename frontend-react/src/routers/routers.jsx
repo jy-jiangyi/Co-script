@@ -4,7 +4,7 @@ import CommonLayout from "../layouts/CommonLayout.jsx";
 import WelcomeLayout from "../layouts/WelcomeLayout.jsx";
 
 import SciptManagementPage from "../pages/ScriptManagementPage.jsx";
-import ContextManagementPage from "../pages/ContextManagementPage.jsx";
+import ContextManagementPage from "../pages/ContextManagementPage.tsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
@@ -21,7 +21,7 @@ function ProjectRoutes() {
             <Route path="/contact" element={<WelcomeLayout><ContactPage /></WelcomeLayout>}></Route>
             <Route path="/Login" element={<WelcomeLayout><LoginPage /></WelcomeLayout>}></Route>
             <Route path="/register" element={<WelcomeLayout><RegisterPage /></WelcomeLayout>}></Route>
-            <Route path="/context" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
+            <Route path="/context" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>
             <Route path="/scene_illustration" element={<CommonLayout><SceneIllustrationGenerationPage /></CommonLayout>}></Route>
             <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
             <Route path="/script_editing" element={<CommonLayout><ScriptEditingPage /></CommonLayout>}></Route>
