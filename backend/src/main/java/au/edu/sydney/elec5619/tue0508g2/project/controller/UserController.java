@@ -1,6 +1,7 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Users;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.request.UserLoginRequestBody;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.UsersRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -54,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Users user, HttpServletRequest request) {
+    public ResponseEntity<String> loginUser(@RequestBody UserLoginRequestBody user, HttpServletRequest request) {
         // 检查用户是否存在
         Users existingUser = usersRepository.findByEmail(user.getEmail());
         if (existingUser == null) {
