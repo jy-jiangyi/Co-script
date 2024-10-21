@@ -3,21 +3,47 @@ import { Menu } from 'antd';
 import { Link } from 'react-router-dom';
 
 const WelcomeNavBar = () => {
-    return (
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
-            <Menu.Item key="1">
+
+    const menuItems = [
+        {
+            key: "1",
+            label: (
                 <Link to="/">Home</Link>
-            </Menu.Item>
-            <Menu.Item key="2">
+            )
+        },
+        {
+            key: "2",
+            label: (
                 <Link to="/about">About</Link>
-            </Menu.Item>
-            <Menu.Item key="3">
+            )
+        },
+        {
+            key: "3",
+            label: (
                 <Link to="/contact">Contact</Link>
-            </Menu.Item>
-            <Menu.Item key="4">
-                <Link to="/login">Login</Link>
-            </Menu.Item>
-        </Menu>
+            )
+        },
+        {
+            key: "4",
+            label: (
+                <Link to="/login">Home</Link>
+            )
+        },
+        {
+            key: "5",
+            label: (
+                <Link to="/context">Context</Link>
+            )
+        }
+    ];
+
+    return (
+        <Menu 
+            theme="dark" 
+            mode="horizontal" 
+            style={{width: "100%"}}
+            defaultSelectedKeys={['1']}
+            items={menuItems}/>
     );
 };
 
