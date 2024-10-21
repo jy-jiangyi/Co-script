@@ -14,22 +14,15 @@ const WelcomeNavBar = () => {
             label: (
                 <Link to="/">Home</Link>
             )
-        },
+        }];
+        let user_menu = [
         {
             key: "2",
             label: (
-                <Link to="/about">About</Link>
+                <Link to="/home">Script Lib</Link>
             )
-        },
-        {
+        },{
             key: "3",
-            label: (
-                <Link to="/contact">Contact</Link>
-            )
-        }];
-        let user_menu = [,
-        {
-            key: "5",
             label: (
                 <Link to="/context">Context</Link>
             )
