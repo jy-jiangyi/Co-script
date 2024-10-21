@@ -22,11 +22,11 @@ function ProjectRoutes() {
             <Route path="/Login" element={<WelcomeLayout><LoginPage /></WelcomeLayout>}></Route>
             <Route path="/register" element={<WelcomeLayout><RegisterPage /></WelcomeLayout>}></Route>
             <Route path="/context" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>
-            <Route path="/scene_illustration" element={<CommonLayout><SceneIllustrationGenerationPage /></CommonLayout>}></Route>
-            <Route path="/home" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>
-            <Route path="/script_editing" element={<CommonLayout><ScriptEditingPage /></CommonLayout>}></Route>
-            {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
-            {/*<Route path="/" element={<CommonLayout><ContextManagementPage /></CommonLayout>}></Route>*/}
+            <Route path="/scene_illustration" element={<WelcomeLayout><SceneIllustrationGenerationPage /></WelcomeLayout>}></Route>
+            <Route path="/home" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>
+            <Route path="/script_editing" element={<WelcomeLayout><ScriptEditingPage /></WelcomeLayout>}></Route>
+            {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
+            {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
         </Routes>
     );
 }

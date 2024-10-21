@@ -26,12 +26,6 @@ const WelcomeNavBar = () => {
             label: (
                 <Link to="/contact">Contact</Link>
             )
-        },
-        {
-            key: "4",
-            label: (
-                <Link to="/login">Home</Link>
-            )
         }];
         let user_menu = [,
         {

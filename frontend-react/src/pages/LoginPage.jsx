@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Typography, Modal } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useActiveUser } from "../hooks/UserContext";
 
 const { Title } = Typography;
 
 const LoginPage = () => {
+    
+    const { activeUser, setActiveUser } = useActiveUser();
+
     const [email, setEmail] = useState('');
     const [password_hash, setPassword] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [modalContent, setModalContent] = useState('');
     const [modalTitle, setModalTitle] = useState('');
     const [modalIcon, setModalIcon] = useState(null);
+
+    const navigate = useNavigate();
 
     const handleLogin = async () => {
         const errors = [];
@@ -39,11 +45,12 @@ const LoginPage = () => {
             if (response.status === 200) {
                 setModalTitle('Login Successful');
                 setModalContent("Welcome back!");
+                setActiveUser(response.data);
                 setModalIcon(<CheckCircleOutlined style={{ color: 'green', fontSize: 24 }} />);
                 setModalVisible(true);
                 // Redirect or set user state here
                 setTimeout(() => {
-                    window.location.href = '/#/home'; // Change to your home route
+                    navigate('/'); // Change to your home route
                 }, 2000);
             }
         } catch (error) {

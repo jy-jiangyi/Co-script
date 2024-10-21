@@ -1,14 +1,24 @@
 import React, {useEffect, useState} from 'react';
 import { useActiveUser } from "../hooks/UserContext";
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from "react-router-dom";
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
 import axios from 'axios';
 
 const UserOp = () => {
 
+    const navigate = useNavigate();
+
     const handleLogout = () => {
-        setActiveUser('');
+        axios.get("/users/logout")
+        .then(response => {
+            setActiveUser('');
+            navigate('/');
+        })
+        .catch(error => {
+            console.log("logout error: ", error);
+        })
     }
 
     useEffect(() => {
@@ -29,12 +39,18 @@ const UserOp = () => {
             label: 'New User',
             disabled: true,
           },
-        {
-            key: '2',
-            label: (
-                <a href='/#/Login'>Login/Regist</a>
-            )
-        }
+          {
+              key: '2',
+              label: (
+                  <Link to="/Login">Login</Link>
+              )
+          },
+          {
+              key: '3',
+              label: (
+                  <Link to="/register">Regist</Link>
+              )
+          }
     ];
 
     const item_login: MenuProps['items'] = [

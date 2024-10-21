@@ -74,7 +74,14 @@ public class UserController {
         session.setAttribute("userId", existingUser.getId());
 
         // 登录成功，返回 200 状态码和成功消息
-        return ResponseEntity.status(HttpStatus.OK).body("Login successful.");
+        return ResponseEntity.status(HttpStatus.OK).body(existingUser.getName());
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logoutUser(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.removeAttribute("userId");
+        return ResponseEntity.status(HttpStatus.OK).body("Logout successful.");
     }
 
     @GetMapping("/name")
