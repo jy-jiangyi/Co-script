@@ -76,4 +76,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("Login successful.");
     }
 
+    @GetMapping("/name")
+    public ResponseEntity<String> getUserName(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
+        }else{
+            Users user = usersRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
+            }else{
+                return ResponseEntity.status(HttpStatus.OK).body(user.getName());
+            }
+        }
+    }
+
 }
