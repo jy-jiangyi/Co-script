@@ -1,10 +1,14 @@
 import React from 'react';
 import { Menu } from 'antd';
 import { Link } from 'react-router-dom';
+import { useActiveUser } from '../hooks/UserContext';
 
 const WelcomeNavBar = () => {
 
-    const menuItems = [
+    const { activeUser, setActiveUser } = useActiveUser();
+
+    const menuItems = () => {
+        let base_menu = [
         {
             key: "1",
             label: (
@@ -22,20 +26,20 @@ const WelcomeNavBar = () => {
             label: (
                 <Link to="/contact">Contact</Link>
             )
-        },
-        {
-            key: "4",
-            label: (
-                <Link to="/login">Home</Link>
-            )
-        },
+        }];
+        let user_menu = [,
         {
             key: "5",
             label: (
                 <Link to="/context">Context</Link>
             )
+        }];
+        if(activeUser){
+            return [...base_menu, ...user_menu];
+        }else{
+            return base_menu;
         }
-    ];
+    };
 
     return (
         <Menu 
@@ -43,7 +47,7 @@ const WelcomeNavBar = () => {
             mode="horizontal" 
             style={{width: "100%"}}
             defaultSelectedKeys={['1']}
-            items={menuItems}/>
+            items={menuItems()}/>
     );
 };
 
