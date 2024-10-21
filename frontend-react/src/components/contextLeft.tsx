@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Input, Skeleton, Card } from 'antd';
+import { Input, Skeleton } from 'antd';
 import { List, Layout, Button, theme } from 'antd';
-const { Header, Content, Footer, Sider } = Layout;
+const { Content } = Layout;
 import { useActiveCtx } from "../hooks/ActiveContext";
-import type { GetProps } from 'antd';
 
 const { Search } = Input;
-
-type SearchProps = GetProps<typeof Input.Search>;
 
 let mockContextLeftIndex = 0;
 
@@ -21,9 +18,6 @@ interface ContextType {
 const loadEachTime = 5;
 
 const ContextList = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
 
     const {activeCtx, setActiveCtx} = useActiveCtx();
 

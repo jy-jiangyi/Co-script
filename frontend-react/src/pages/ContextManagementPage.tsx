@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Breadcrumb, Layout, Button, theme } from 'antd';
 import { ActiveCtxProvider } from "../hooks/ActiveContext";
 import ContextList from "../components/contextLeft";
-
+import ContextArea from "../components/ContextRight";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -25,7 +25,7 @@ const ContextManagementPage = () => {
                     <ContextList />
                 </Sider>
                 <Content style={{ padding: '0 24px', minHeight: 280 }}>
-                    Content
+                    <ContextArea />
                 </Content>
             </Layout>
         </Content>
