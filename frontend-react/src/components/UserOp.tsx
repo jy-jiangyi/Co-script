@@ -29,6 +29,7 @@ const UserOp = () => {
                 setActiveUser(name);
             })
             .catch(error => {
+                navigate('/Login');
                 console.log("error", error)
             })
     },[]);

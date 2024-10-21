@@ -1,6 +1,5 @@
 import { Routes, Route, Link } from "react-router-dom";
 
-import CommonLayout from "../layouts/CommonLayout.jsx";
 import WelcomeLayout from "../layouts/WelcomeLayout.jsx";
 
 import SciptManagementPage from "../pages/ScriptManagementPage.jsx";
