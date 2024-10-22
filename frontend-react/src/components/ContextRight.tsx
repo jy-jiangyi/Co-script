@@ -104,7 +104,8 @@ const ContextArea = () => {
                         <TextArea rows={4} />
                     </Form.Item>
                     <Form.Item label=" "  colon={false}>
-                        <Button type="primary" onClick={handleSubmit}>Submit</Button>
+                    <Button type="primary" onClick={handleSubmit}>Submit</Button>
+                    <Button type="primary" onClick={handleSubmit}>Create</Button>
                     </Form.Item>
                     <Form.Item label=" "  colon={false}>
                         {notifyPop()}
