@@ -3,7 +3,7 @@ import { Input, Skeleton } from 'antd';
 import { List, Layout, Button, theme } from 'antd';
 const { Content } = Layout;
 import { useActiveCtx } from "../hooks/ActiveContext";
-
+import axios from "axios";
 const { Search } = Input;
 
 let mockContextLeftIndex = 0;
@@ -15,7 +15,7 @@ interface ContextType {
     loading: boolean;
 };
 
-const loadEachTime = 5;
+const loadEachTime = 3;
 
 const ContextList = () => {
 
@@ -29,6 +29,7 @@ const ContextList = () => {
     
     const [listReloading, setListReloading] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [keyword, setKeyword] = useState('');
     const [data, setData] = useState<{ [key: string]: ContextType }>({});
     const [ctxList, setCtxList] = useState<ContextType[]>([]);
 
@@ -55,12 +56,27 @@ const ContextList = () => {
     }, [loading]);
 
     // Reponse List event
-    const onSearch = () => {
+    const onSearch = (value:string) => {
         setListReloading(true);
-        setTimeout(() => {
-            setData({});
+        setData({});
+        setKeyword(value);
+        axios.get('/context/search', {
+            params: {
+                keyword: value,
+                offset: 0,
+                amount: loadEachTime
+            }
+        }).then(response => {
+            let newData = {}
+            for(let ctx of response.data.content){
+                newData[ctx.id] = ctx;
+            }
+            setData(newData);
+        }).catch(error => {
+
+        }).finally(() => {
             setListReloading(false);
-        }, 1000);
+        });
     };
 
     const handleEdit = (item:ContextType) => {
@@ -68,19 +84,38 @@ const ContextList = () => {
     };
 
     const handleDel = (item:ContextType) => {
-        console.log("request to delete", item.id);
+        setListReloading(true);
+        axios.delete('/context/'+item.id)
+            .then(response => {
+                let newData = {...data};
+                delete newData[item.id]
+                setData(newData);
+            }).catch(error => {
+
+            }).finally(() => {
+                setListReloading(false);
+            });
     };
 
     const onLoadMore = () => {
         setLoading(true);
-        setTimeout(() => {
-            let new_data = {...data};
-            for(let i=0; i<loadEachTime; i++){
-                let n_idx = (++mockContextLeftIndex)+"";
-                new_data[n_idx] = { loading: false, title: 'n', description: 'xxxx', id: n_idx }
+        axios.get('/context/search', {
+            params: {
+                keyword: keyword,
+                offset: ctxList.length,
+                amount: loadEachTime
             }
-            setData(new_data);
-        }, 1000);
+        }).then(response => {
+            let newData = {}
+            for(let ctx of response.data.content){
+                newData[ctx.id] = ctx;
+            }
+            setData({...data, ...newData});
+        }).catch(error => {
+
+        }).finally(() => {
+            setLoading(false);
+        });
     };
 
     return (
