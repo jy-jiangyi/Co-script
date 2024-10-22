@@ -1,15 +1,22 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import au.edu.sydney.elec5619.tue0508g2.project.dto.ScriptScenesDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptGeneration;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,9 +40,38 @@ public class ScriptsController {
     public Mono<String> generateScript(@RequestParam String name,
                                        @RequestParam List<String> contextList,
                                        @RequestParam String positive,
-                                       @RequestParam String negative) {
+                                       @RequestParam String negative,
+                                       HttpServletRequest request) {
 
-        return scriptGeneration.generateScript(name, contextList, positive, negative);
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+
+//        if (userId == null) {
+//            return Mono.just("User not authorized.");
+//        }
+
+        return scriptGeneration.generateScript(name, contextList, positive, negative)
+                .flatMap(generatedScript -> {
+                    // 创建新的 Script 对象并保存到数据库
+                    Script script = new Script();
+//                    script.setCreator(userId);  // 直接设置创建者ID
+                    script.setCreator(1L);  // test
+                    script.setName(name);       // 设置脚本名称
+                    script.setCreateTime(LocalDateTime.now());
+                    scriptRepository.save(script);
+
+                    // 保存生成的内容到 ScriptScenes 表
+                    ScriptScenes scriptScenes = new ScriptScenes();
+                    scriptScenes.setScript(script);  // 关联 Script 对象
+                    scriptScenes.setScene(1);  // 设置场次编号
+                    scriptScenes.setTitle(name);  // 设置场景标题
+                    scriptScenes.setContent(generatedScript);  // 设置生成的内容
+                    scriptScenes.setCreate_time(LocalDateTime.now());  // 创建时间
+                    scriptScenesRepository.save(scriptScenes);
+
+                    // 返回生成的脚本ID
+                    return Mono.just("Script generated with ID: " + script.getId());
+                });
     }
 
     // emulate
@@ -72,7 +108,7 @@ public class ScriptsController {
         return scriptGeneration.translateScript(name, contextList, positive, negative, existingScript, language);
     }
 
-    // save AI生成的Script
+
 
     // update 我的Script
 
