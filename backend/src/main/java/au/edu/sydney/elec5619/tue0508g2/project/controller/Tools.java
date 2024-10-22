@@ -29,11 +29,12 @@ public class Tools {
     @PostMapping(value = "/ai_test_json", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<String> ai_test_json(@RequestBody AITestRequestBody body) {
         return aiGemini.textGeneration(body).map(
-                original -> original.trim()
-                            .replaceFirst("```json", "")
-                            .replace("```", "")
-                            .trim()
+                original ->original.trim()
+                        .replaceFirst("```json", "")
+                        .replace("```", "")
+                        .trim()
         );
+
     }
 
 
@@ -41,5 +42,6 @@ public class Tools {
     public Mono<String> aiImageTest(@RequestBody AIImageRequestBody body) {
         return aiOpenAI.imageGeneration(body);
     }
+
 
 }

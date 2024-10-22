@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // add server url
+  build: {
+    sourcemap: true, // 
+  },
   server: {
     port: 5173,
     proxy: {
@@ -22,6 +25,11 @@ export default defineConfig({
         target: "http://localhost:8080/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/user/, "user"),
+      },
+      "/context": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/context/, "context"),
       }
     }
   }

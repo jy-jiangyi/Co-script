@@ -1,6 +1,7 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Users;
+import au.edu.sydney.elec5619.tue0508g2.project.entity.request.UserLoginRequestBody;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.UsersRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -54,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Users user, HttpServletRequest request) {
+    public ResponseEntity<String> loginUser(@RequestBody UserLoginRequestBody user, HttpServletRequest request) {
         // 检查用户是否存在
         Users existingUser = usersRepository.findByEmail(user.getEmail());
         if (existingUser == null) {
@@ -73,7 +74,30 @@ public class UserController {
         session.setAttribute("userId", existingUser.getId());
 
         // 登录成功，返回 200 状态码和成功消息
-        return ResponseEntity.status(HttpStatus.OK).body("Login successful.");
+        return ResponseEntity.status(HttpStatus.OK).body(existingUser.getName());
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logoutUser(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.removeAttribute("userId");
+        return ResponseEntity.status(HttpStatus.OK).body("Logout successful.");
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<String> getUserName(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
+        }else{
+            Users user = usersRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
+            }else{
+                return ResponseEntity.status(HttpStatus.OK).body(user.getName());
+            }
+        }
     }
 
 }
