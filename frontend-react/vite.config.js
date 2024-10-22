@@ -25,6 +25,11 @@ export default defineConfig({
         target: "http://localhost:8080/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/user/, "user"),
+      },
+      "/context": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/context/, "context"),
       }
     }
   }
