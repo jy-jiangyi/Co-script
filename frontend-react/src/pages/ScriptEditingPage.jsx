@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Menu, Layout, Breadcrumb, theme } from "antd";
+import { Menu, Layout, Breadcrumb, theme, Tabs, Button } from "antd";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-import { Tabs, Button } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
+import ReactQuill from "react-quill"; // 导入 ReactQuill
+import "react-quill/dist/quill.snow.css"; // 导入样式
 
-const { Header, Content, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const ScriptDemo1 = () => {
   const {
@@ -22,6 +23,8 @@ const ScriptDemo1 = () => {
   const [scenes, setScenes] = useState([]);
   const [selectedScene, setSelectedScene] = useState(null);
   const [redirect, setRedirect] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editorContent, setEditorContent] = useState(""); // 用于存储编辑器内容
 
   const location = useLocation();
 
@@ -53,7 +56,14 @@ const ScriptDemo1 = () => {
       { key: 'transition', label: 'Transition' },
       { key: 'general', label: 'General' },
       { key: 'action', label: 'Action' },
-      { key: 'editing', label: 'Editing' },
+      {
+        key: 'editing',
+        label: (
+          <Button type="primary" onClick={toggleEditing}>
+            {editing ? "Save" : "Edit"}
+          </Button>
+        ),
+      },
       {
         key: 'scene-illustration',
         label: (
@@ -101,6 +111,41 @@ const ScriptDemo1 = () => {
     return <Navigate to="/scene_illustration" />;
   }
 
+  // 切换编辑状态
+  const toggleEditing = () => {
+    setEditing((prevEditing) => {
+      const newEditing = !prevEditing; // 取反当前状态
+      if (newEditing) {
+        // 进入编辑模式
+        if (selectedScene) {
+          setEditorContent(selectedScene.content); // 设置编辑器内容
+        }
+      } else {
+        // 离开编辑模式，保存内容
+        saveSceneContent();
+      }
+      return newEditing; // 返回新的状态
+    });
+  };
+
+  // 保存场景内容
+  const saveSceneContent = async () => {
+    if (selectedScene) {
+      try {
+        // 直接发送 editorContent，确保它是一个字符串
+        await axios.put(`/api/script_scenes/update_content/${selectedScene.id}`, editorContent, {
+          headers: {
+            'Content-Type': 'text/plain', // 提示后端这是纯文本
+          },
+        });
+        // 如果需要，可以更新 selectedScene 的内容
+        setSelectedScene(prev => ({ ...prev, content: editorContent })); 
+      } catch (error) {
+        console.error("Error saving scene content:", error);
+      }
+    }
+  };
+
   return (
     <Layout>
       <Content style={{ padding: "0 48px" }}>
@@ -125,7 +170,10 @@ const ScriptDemo1 = () => {
               {scenes.map((scene) => (
                 <Menu.Item
                   key={scene.id}
-                  onClick={() => setSelectedScene(scene)}
+                  onClick={() => {
+                    setSelectedScene(scene);
+                    setEditorContent(scene.content); // 设置编辑器内容
+                  }}
                 >
                   Scene {scene.id}: {scene.title}
                 </Menu.Item>
@@ -146,24 +194,32 @@ const ScriptDemo1 = () => {
             {selectedScene && (
               <div>
                 <h2>{selectedScene.title}</h2>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw, rehypeHighlight]}
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
-                        <pre data-language={match[1]}>
+                {editing ? (
+                  <ReactQuill
+                    value={editorContent}
+                    onChange={setEditorContent}
+                    style={{ height: "300px" }} // 设置高度
+                  />
+                ) : (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        return !inline && match ? (
+                          <pre data-language={match[1]}>
+                            <code {...props}>{children}</code>
+                          </pre>
+                        ) : (
                           <code {...props}>{children}</code>
-                        </pre>
-                      ) : (
-                        <code {...props}>{children}</code>
-                      );
-                    },
-                  }}
-                >
-                  {selectedScene.content}
-                </ReactMarkdown>
+                        );
+                      },
+                    }}
+                  >
+                    {selectedScene.content}
+                  </ReactMarkdown>
+                )}
               </div>
             )}
           </Content>
