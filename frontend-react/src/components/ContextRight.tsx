@@ -1,16 +1,15 @@
-import React, { Context, useEffect, useState } from "react";
+import React, { act, Context, useEffect, useState } from "react";
 import { Input, Spin } from 'antd';
 import { Layout, Form, Button, Alert } from 'antd';
 const { Content } = Layout;
 import { useActiveCtx } from "../hooks/ActiveContext";
-
-import type { FormProps } from 'antd';
+import axios from 'axios';
 
 const { TextArea } = Input;
 
 interface ContextModel {
     id: string;
-    name: string;
+    title: string;
     description: string;
     postive: string;
     negative: string;
@@ -25,7 +24,7 @@ const ContextArea = () => {
     
     const { activeCtx, setActiveCtx } = useActiveCtx();
     const [ctxModel, setCtxModel] = useState<ContextModel>({
-        id: '', name: 'x', description: 'x', postive: 'x', negative: 'x'
+        id: '', title: '', description: '', postive: '', negative: ''
     })
 
     // Bind data change event
@@ -34,26 +33,59 @@ const ContextArea = () => {
     }, []);
 
     useEffect(() => {
-        setFormDisibled(true);
-        setFormLoading(true);
-        setTimeout(()=>{
-            ctxModel.name = activeCtx;
-            form.setFieldsValue(ctxModel);
-            setNotifyState('');
+        if(activeCtx){
+            setFormDisibled(true);
+            setFormLoading(true);
+            axios.get('/context/'+activeCtx)
+            .then(response => {
+                let newCtxModel = response.data;
+                setCtxModel(newCtxModel);
+                form.setFieldsValue(newCtxModel);
+            }).catch(error => {
+                setNotifyState('FAIL: failed to fetch '+activeCtx);
+            }).finally(() => {
+                setFormDisibled(false);
+                setFormLoading(false);
+            });
+        }else{
             setFormDisibled(false);
-            setFormLoading(false);
-        }, 1000);
-        console.log("new script selected: ", activeCtx)
+            form.setFieldsValue(ctxModel);
+        }
     }, [activeCtx]);
 
-    const handleSubmit = () => {
+    const handleUpdate = () => {
         setFormDisibled(true);
         setFormLoading(true);
-        setTimeout(() => {
-            setNotifyState("SUC:successfully updated");
-            setFormDisibled(false);
-            setFormLoading(false);
-        }, 1000);
+        let newCtx = {...ctxModel, ...form.getFieldsValue()};
+        setCtxModel(newCtx);
+        axios.put('/context/'+activeCtx, newCtx)
+            .then(response => {
+                setNotifyState("SUC:successfully updated");
+            }).catch(error => {
+                setNotifyState("FAIL:failed updated");
+            }).finally(() => {
+                setFormDisibled(false);
+                setFormLoading(false);
+            });
+    };
+
+    const handleCreate = () => {
+        setFormDisibled(true);
+        setFormLoading(true);
+        axios.post("/context/", form.getFieldsValue())
+            .then(response => {
+                let newCtx = {...ctxModel, ...form.getFieldsValue()};
+                newCtx.id = response.data;
+                setCtxModel(newCtx);
+                setNotifyState("SUC:successful create");
+            })
+            .catch(error => {
+                setNotifyState("FAIL:error create");
+            })
+            .finally(() => {
+                setFormDisibled(false);
+                setFormLoading(false);
+            });
     };
 
     const notifyPop = () => {
@@ -91,7 +123,7 @@ const ContextArea = () => {
                     style={{ maxWidth: 600 }}
                     disabled={formDisibled}
                 >
-                    <Form.Item name="name" label="Name" >
+                    <Form.Item name="title" label="Name" >
                         <Input />
                     </Form.Item>
                     <Form.Item label="Description" name="description">
@@ -104,7 +136,8 @@ const ContextArea = () => {
                         <TextArea rows={4} />
                     </Form.Item>
                     <Form.Item label=" "  colon={false}>
-                        <Button type="primary" onClick={handleSubmit}>Submit</Button>
+                    <Button type="primary" onClick={handleCreate}>Create</Button>
+                    <Button type="primary" style={{marginLeft: 40}} onClick={handleUpdate} disabled={'' == ctxModel.id}>Update</Button>
                     </Form.Item>
                     <Form.Item label=" "  colon={false}>
                         {notifyPop()}
