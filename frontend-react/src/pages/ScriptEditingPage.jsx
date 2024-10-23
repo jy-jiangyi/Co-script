@@ -51,14 +51,14 @@ const ScriptDemo1 = () => {
 
   const NavigationBar = () => {
     const tabItems = [
-      { key: 'character', label: 'Character' },
-      { key: 'parenthetical', label: 'Parenthetical' },
-      { key: 'dialogue', label: 'Dialogue' },
-      { key: 'transition', label: 'Transition' },
-      { key: 'general', label: 'General' },
-      { key: 'action', label: 'Action' },
+      { key: "character", label: "Character" },
+      { key: "parenthetical", label: "Parenthetical" },
+      { key: "dialogue", label: "Dialogue" },
+      { key: "transition", label: "Transition" },
+      { key: "general", label: "General" },
+      { key: "action", label: "Action" },
       {
-        key: 'editing',
+        key: "editing",
         label: (
           <Button type="primary" onClick={toggleEditing}>
             {editing ? "Save" : "Edit"}
@@ -66,18 +66,12 @@ const ScriptDemo1 = () => {
         ),
       },
       {
-        key: 'scene-illustration',
-        label: (
-          <Link to="/scene_illustration">
-            <Button type="primary" size="small" style={{ marginLeft: '2px' }}>
-              Scene Illustration
-            </Button>
-          </Link>
-        ),
+        key: "scene-illustration",
+        label: <Link to="/scene_illustration">Scene Illustration</Link>,
       },
-      { key: 'all-continuation', label: 'All Continuation' },
+      { key: "AI-continuation", label: "AI Continuation" },
     ];
-  
+
     return (
       <StyledTabs defaultActiveKey="character" centered items={tabItems} />
     );
@@ -119,8 +113,8 @@ const ScriptDemo1 = () => {
       if (newEditing) {
         // Enter edit mode
         if (selectedScene) {
-            const htmlContent = marked(selectedScene.content);
-            setEditorContent(htmlContent); // Set editor content to Markdown
+          const htmlContent = marked(selectedScene.content);
+          setEditorContent(htmlContent); // Set editor content to Markdown
         }
       } else {
         // Save content when exiting edit mode
@@ -135,13 +129,17 @@ const ScriptDemo1 = () => {
     if (selectedScene) {
       try {
         // Directly send editorContent, ensure it's a string
-        await axios.put(`/api/script_scenes/update_content/${selectedScene.id}`, editorContent, {
-          headers: {
-            'Content-Type': 'text/plain', // Indicate pure text to backend
-          },
-        });
+        await axios.put(
+          `/api/script_scenes/update_content/${selectedScene.id}`,
+          editorContent,
+          {
+            headers: {
+              "Content-Type": "text/plain", // Indicate pure text to backend
+            },
+          }
+        );
         // Optionally update selectedScene's content
-        setSelectedScene(prev => ({ ...prev, content: editorContent })); 
+        setSelectedScene((prev) => ({ ...prev, content: editorContent }));
       } catch (error) {
         console.error("Error saving scene content:", error);
       }
@@ -152,12 +150,12 @@ const ScriptDemo1 = () => {
     <Layout>
       <Content style={{ padding: "0 48px" }}>
         <Breadcrumb style={{ margin: "16px 0" }}>
-        <Breadcrumb.Item>
+          <Breadcrumb.Item>
             <Link to="/home">
-            <HomeOutlined />
-            <span>Home</span>
+              <HomeOutlined />
+              <span>Home</span>
             </Link>
-        </Breadcrumb.Item>
+          </Breadcrumb.Item>
           <Breadcrumb.Item>Script Editing</Breadcrumb.Item>
         </Breadcrumb>
         <div>
