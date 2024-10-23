@@ -9,8 +9,9 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
-import ReactQuill from "react-quill"; // 导入 ReactQuill
-import "react-quill/dist/quill.snow.css"; // 导入样式
+import ReactQuill from "react-quill"; // Import ReactQuill
+import "react-quill/dist/quill.snow.css"; // Import styles
+import { marked } from "marked"; // Import marked for Markdown conversion
 
 const { Content, Sider } = Layout;
 
@@ -24,7 +25,7 @@ const ScriptDemo1 = () => {
   const [selectedScene, setSelectedScene] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editorContent, setEditorContent] = useState(""); // 用于存储编辑器内容
+  const [editorContent, setEditorContent] = useState(""); // For storing editor content
 
   const location = useLocation();
 
@@ -111,34 +112,35 @@ const ScriptDemo1 = () => {
     return <Navigate to="/scene_illustration" />;
   }
 
-  // 切换编辑状态
+  // Toggle editing state
   const toggleEditing = () => {
     setEditing((prevEditing) => {
-      const newEditing = !prevEditing; // 取反当前状态
+      const newEditing = !prevEditing; // Toggle current state
       if (newEditing) {
-        // 进入编辑模式
+        // Enter edit mode
         if (selectedScene) {
-          setEditorContent(selectedScene.content); // 设置编辑器内容
+            const htmlContent = marked(selectedScene.content);
+            setEditorContent(htmlContent); // Set editor content to Markdown
         }
       } else {
-        // 离开编辑模式，保存内容
+        // Save content when exiting edit mode
         saveSceneContent();
       }
-      return newEditing; // 返回新的状态
+      return newEditing; // Return new state
     });
   };
 
-  // 保存场景内容
+  // Save scene content
   const saveSceneContent = async () => {
     if (selectedScene) {
       try {
-        // 直接发送 editorContent，确保它是一个字符串
+        // Directly send editorContent, ensure it's a string
         await axios.put(`/api/script_scenes/update_content/${selectedScene.id}`, editorContent, {
           headers: {
-            'Content-Type': 'text/plain', // 提示后端这是纯文本
+            'Content-Type': 'text/plain', // Indicate pure text to backend
           },
         });
-        // 如果需要，可以更新 selectedScene 的内容
+        // Optionally update selectedScene's content
         setSelectedScene(prev => ({ ...prev, content: editorContent })); 
       } catch (error) {
         console.error("Error saving scene content:", error);
@@ -150,10 +152,12 @@ const ScriptDemo1 = () => {
     <Layout>
       <Content style={{ padding: "0 48px" }}>
         <Breadcrumb style={{ margin: "16px 0" }}>
-          <Breadcrumb.Item href="#/home">
+        <Breadcrumb.Item>
+            <Link to="/home">
             <HomeOutlined />
             <span>Home</span>
-          </Breadcrumb.Item>
+            </Link>
+        </Breadcrumb.Item>
           <Breadcrumb.Item>Script Editing</Breadcrumb.Item>
         </Breadcrumb>
         <div>
@@ -172,7 +176,7 @@ const ScriptDemo1 = () => {
                   key={scene.id}
                   onClick={() => {
                     setSelectedScene(scene);
-                    setEditorContent(scene.content); // 设置编辑器内容
+                    setEditorContent(scene.content); // Set editor content
                   }}
                 >
                   Scene {scene.id}: {scene.title}
@@ -198,7 +202,7 @@ const ScriptDemo1 = () => {
                   <ReactQuill
                     value={editorContent}
                     onChange={setEditorContent}
-                    style={{ height: "300px" }} // 设置高度
+                    style={{ height: "300px" }} // Set height
                   />
                 ) : (
                   <ReactMarkdown
