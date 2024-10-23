@@ -94,7 +94,7 @@ public class ScriptsController {
                 .flatMap(emulatedScript -> {
                     // 创建新的 Script 对象并保存到数据库
                     Script script = new Script();
-                     script.setCreator(userId);  // 直接设置创建者ID
+                    script.setCreator(userId);  // 直接设置创建者ID
 //                    script.setCreator(1L);  // test
                     script.setName(name);       // 设置脚本名称
                     script.setCreateTime(LocalDateTime.now());
@@ -127,16 +127,16 @@ public class ScriptsController {
         Long userId = (Long) session.getAttribute("userId");
 
         // For testing, set a default userId if it's not available
-        // if (userId == null) {
-        //     return Mono.just("User not authorized.");
-        // }
+         if (userId == null) {
+             return Mono.just("User not authorized.");
+         }
 
         return scriptGeneration.rewriteScript(name, contextList, positive, negative, existingScript)
                 .flatMap(rewrittenScript -> {
                     // 创建新的 Script 对象并保存到数据库
                     Script script = new Script();
-                    // script.setCreator(userId);  // 直接设置创建者ID
-                    script.setCreator(1L);  // test
+                    script.setCreator(userId);  // 直接设置创建者ID
+//                    script.setCreator(1L);  // test
                     script.setName(name);       // 设置脚本名称
                     script.setCreateTime(LocalDateTime.now());
                     scriptRepository.save(script);
@@ -163,10 +163,41 @@ public class ScriptsController {
                                         @RequestParam String positive,
                                         @RequestParam String negative,
                                         @RequestParam String existingScript,
-                                        @RequestParam String language) {
+                                        @RequestParam String language,
+                                        HttpServletRequest request) {
 
-        return scriptGeneration.translateScript(name, contextList, positive, negative, existingScript, language);
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+
+        // For testing, set a default userId if it's not available
+         if (userId == null) {
+             return Mono.just("User not authorized.");
+         }
+
+        return scriptGeneration.translateScript(name, contextList, positive, negative, existingScript, language)
+                .flatMap(translatedScript -> {
+                    // 创建新的 Script 对象并保存到数据库
+                    Script script = new Script();
+                    script.setCreator(userId);  // 直接设置创建者ID
+//                    script.setCreator(1L);  // test
+                    script.setName(name);       // 设置脚本名称
+                    script.setCreateTime(LocalDateTime.now());
+                    scriptRepository.save(script);
+
+                    // 保存生成的内容到 ScriptScenes 表
+                    ScriptScenes scriptScenes = new ScriptScenes();
+                    scriptScenes.setScript(script);  // 关联 Script 对象
+                    scriptScenes.setScene(1);  // 设置场次编号
+                    scriptScenes.setTitle(name);  // 设置场景标题
+                    scriptScenes.setContent(translatedScript);  // 设置翻译后的内容
+                    scriptScenes.setCreate_time(LocalDateTime.now());  // 创建时间
+                    scriptScenesRepository.save(scriptScenes);
+
+                    // 返回生成的脚本ID
+                    return Mono.just("Translated script generated with ID: " + script.getId());
+                });
     }
+
 
 
 
