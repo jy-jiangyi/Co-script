@@ -4,6 +4,7 @@ import au.edu.sydney.elec5619.tue0508g2.project.utils.SceneIllustrationGeneratio
 import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +49,16 @@ public class ScriptScenesController {
         scriptScene.setTitle(scriptSceneDetails.getTitle());
         scriptScenesRepository.save(scriptScene);
         return "Updated";
+    }
+
+    @PutMapping("/update_content/{id}")
+    public ResponseEntity<String> updateContent(@PathVariable Long id, @RequestBody String newContent) {
+        int updatedRows = scriptScenesRepository.updateContent(id, newContent);
+        if (updatedRows > 0) {
+            return ResponseEntity.ok("Content updated successfully.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // delete scene

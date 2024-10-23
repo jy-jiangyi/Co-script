@@ -160,7 +160,7 @@ public class ScriptsController {
 
         // 将 ScriptScenes 转换为 ScriptScenesDTO
         List<ScriptScenesDTO> sceneDTOs = scenes.stream()
-                .map(scene -> new ScriptScenesDTO(scene.getScene(), scene.getTitle(), scene.getContent())) // 确保传递所有字段
+                .map(scene -> new ScriptScenesDTO(scene.getId(), scene.getScene(), scene.getTitle(), scene.getContent())) // 确保传递所有字段
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(sceneDTOs); // 返回 200 OK 和 DTO 列表
