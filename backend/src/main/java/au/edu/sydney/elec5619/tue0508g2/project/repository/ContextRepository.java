@@ -12,4 +12,8 @@ public interface ContextRepository extends JpaRepository<Context, Long> {
     @Query("SELECT c FROM Context c WHERE c.title LIKE %:key% OR c.description LIKE %:key%")
     Page<Context> findPageByKey(@Param("key") String key, Pageable pageable);
 
+    @Query("SELECT c FROM Context c WHERE c.creator = :creator")
+    Page<Context> findByCreator(@Param("creator") Long creator, Pageable pageable);
+
+
 }
