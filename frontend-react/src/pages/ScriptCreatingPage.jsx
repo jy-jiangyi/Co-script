@@ -1,35 +1,89 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
 const ScriptGenerationPage = () => {
     const [scriptName, setScriptName] = useState('');
     const [source, setSource] = useState('None');  // 将 source 的初始值设为 "None"
-    const [contexts, setContexts] = useState([]);  // 初始值为空，不显示默认上下文
     const [positivePrompt, setPositivePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
     const [scriptContent, setScriptContent] = useState('');  // 用来管理用户输入的脚本内容
     const [language, setLanguage] = useState('');            // 翻译语言
+
+
     const [isModalOpen, setIsModalOpen] = useState(false);  // 控制弹窗显示状态
+    const [modalContexts, setModalContexts] = useState([]);  // 用于弹窗中的分页数据
+    const [selectedContexts, setSelectedContexts] = useState([]);  // 用户选择的上下文列表
+    const [currentPage, setCurrentPage] = useState(0);  // 当前页码，从0开始
+    const [totalPages, setTotalPages] = useState(0);  // 总页数
+    const [amount, setAmount] = useState(5);  // 每页显示的数量
 
+    // const allContexts = [
+    //     { id: 1, title: 'Love' },
+    //     { id: 2, title: 'Peace' },
+    //     { id: 3, title: 'Adventure' },
+    //     { id: 4, title: 'Mystery' },
+    //     { id: 5, title: 'Friendship' },
+    //     { id: 6, title: 'Courage' },
+    //     { id: 7, title: 'Dream' },
+    //     { id: 8, title: 'Hope' },
+    //     { id: 9, title: 'Freedom' },
+    //     { id: 10, title: 'Truth' }
+    // ];
 
+    useEffect(() => {
+        fetchContexts(currentPage, amount);  // 页面加载时获取第一页的数据
+    }, [currentPage, amount]);
 
-    const handleOpenModal = () => {
-        setIsModalOpen(true);  // 打开弹窗
+// 修改后的 fetchContexts 方法，调用后端 API 获取上下文数据
+    const fetchContexts = (page, amount) => {
+        fetch(`/context/creator?offset=${page * amount}&amount=${amount}`)
+            .then(response => response.json())
+            .then(data => {
+                // `data.content` 包含上下文列表
+                setModalContexts(data.content);  // 设置上下文列表
+                setTotalPages(data.totalPages);  // 设置总页数
+            })
+            .catch(error => console.error('Error fetching contexts:', error));
     };
 
+    // 处理翻页按钮点击事件
+    const handlePreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);  // 切换到上一页
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);  // 切换到下一页
+        }
+    };
+
+    // 打开弹窗
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    // 关闭弹窗
     const handleCloseModal = () => {
-        setIsModalOpen(false);  // 关闭弹窗
+        setIsModalOpen(false);
+    };
+
+    // 用户选择上下文
+    const handleSelectContext = (context) => {
+        setSelectedContexts([...selectedContexts, context.title]);  // 添加选择的上下文到用户上下文列表
+        handleCloseModal();  // 选择后关闭弹窗
     };
 
 
     const deleteContext = (indexToDelete) => {
-        setContexts(contexts.filter((_, index) => index !== indexToDelete));
+        setSelectedContexts(selectedContexts.filter((_, index) => index !== indexToDelete));
     };
 
     const handleGenerateScript = () => {
         // 构建基础请求体
         const requestBody = {
             name: scriptName,
-            contextList: contexts,
+            contextList: selectedContexts,
             positive: positivePrompt,
             negative: negativePrompt,
         };
@@ -111,14 +165,6 @@ const ScriptGenerationPage = () => {
         contextContainer: {
             marginBottom: '20px',
         },
-        button: {
-            padding: '5px 10px',
-            cursor: 'pointer',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-        },
         promptContainer: {
             display: 'block',  // 将flex布局改为block布局使输入框竖直排列
         },
@@ -190,6 +236,21 @@ const ScriptGenerationPage = () => {
             fontWeight: 'bold',
             color: '#007bff',
         },
+        button: {
+            padding: '5px 10px',
+            cursor: 'pointer',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            marginTop: '20px',
+        },
+        paginationControls: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '10px',
+            marginBottom: '20px',  // 给 "Close" 按钮留出更多空间
+        },
     };
 
     return (
@@ -244,46 +305,54 @@ const ScriptGenerationPage = () => {
                     )}
                 </div>
 
-                <div style={styles.contextContainer}>
-                    <label style={styles.label}>Context</label>
-                    {contexts.length === 0 ? (
-                        <p>Please add context</p>  // 如果没有上下文，提示用户添加
-                    ) : (
-                        contexts.map((context, index) => (
-                            <span key={index} style={styles.contextItem}>
-                {context}
-                                <button
-                                    style={styles.deleteButton}
-                                    onClick={() => deleteContext(index)}
-                                >
-                            ×
-                </button>
-            </span>
-                        ))
-                    )}
-                    <button style={styles.button} onClick={handleOpenModal}>+ New Context</button>
+                <div>
+                    <div style={styles.contextContainer}>
+                        <label style={styles.label}>Context</label>
+                        {selectedContexts.length === 0 ? (
+                            <p>Please add context</p>  // 如果没有上下文，提示用户添加
+                        ) : (
+                            selectedContexts.map((context, index) => (
+                                <span key={index} style={styles.contextItem}>
+                            {context}
+                                    <button
+                                        style={styles.deleteButton}
+                                        onClick={() => deleteContext(index)}
+                                    >
+                                ×
+                            </button>
+                        </span>
+                            ))
+                        )}
+                        <button style={styles.button} onClick={handleOpenModal}>+ New Context</button>
 
-                    {/* 弹窗 */}
-                    {isModalOpen && (
-                        <div style={styles.modalOverlay}>
-                            <div style={styles.modal}>
-                                <h3>Select a Context from your Library</h3>
-                                <ul style={styles.contextList}>
-                                    {/* 暂时硬编码一些示例上下文 */}
-                                    {['Love', 'Peace', 'Adventure', 'Mystery'].map((context, index) => (
-                                        <li key={index} style={styles.contextItem} onClick={() => {
-                                            setContexts([...contexts, context]);
-                                            handleCloseModal();  // 选择后关闭弹窗
-                                        }}>
-                                            {context}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <button style={styles.button} onClick={handleCloseModal}>Close</button>
+                        {/* 弹窗 */}
+                        {isModalOpen && (
+                            <div style={styles.modalOverlay}>
+                                <div style={styles.modal}>
+                                    <h3>Select a Context from your Library</h3>
+                                    <ul style={styles.contextList}>
+                                        {modalContexts.map((context) => (
+                                            <li key={context.id} style={styles.contextItem}
+                                                onClick={() => handleSelectContext(context)}>
+                                                {context.title}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {/* 分页控制 */}
+                                    <div style={styles.paginationControls}>
+                                        <button onClick={handlePreviousPage} disabled={currentPage === 0}>
+                                            Previous
+                                        </button>
+                                        <span>Page {currentPage + 1} of {totalPages}</span>
+                                        <button onClick={handleNextPage} disabled={currentPage === totalPages - 1}>
+                                            Next
+                                        </button>
+                                    </div>
+                                    <button style={styles.button} onClick={handleCloseModal}>Close</button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-
+                        )}
+                    </div>
                 </div>
 
                 <div style={styles.formGroup}>
