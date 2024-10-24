@@ -12,6 +12,7 @@ import ContactPage from "../pages/ContactPage.jsx";
 import SceneIllustrationGenerationPage from "../pages/SceneIllustrationGenerationPage.jsx";
 import ScriptEditingPage from "../pages/ScriptEditingPage.jsx"
 import ScriptCreatingPage from "../pages/ScriptCreatingPage.jsx";
+import ScriptManagementPage from "../pages/ScriptManagementPage.jsx";
 
 function ProjectRoutes() {
     return (
@@ -26,6 +27,7 @@ function ProjectRoutes() {
             <Route path="/home" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>
             <Route path="/script_editing" element={<WelcomeLayout><ScriptEditingPage /></WelcomeLayout>}></Route>
             <Route path="/script_creating" element={<WelcomeLayout><ScriptCreatingPage /></WelcomeLayout>}></Route>
+            <Route path="/script_management" element={<WelcomeLayout><ScriptManagementPage /></WelcomeLayout>}></Route>
             {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
             {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
         </Routes>

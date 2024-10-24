@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
 
 const ScriptGenerationPage = () => {
     const [scriptName, setScriptName] = useState('');
@@ -15,6 +17,9 @@ const ScriptGenerationPage = () => {
     const [currentPage, setCurrentPage] = useState(0);  // 当前页码，从0开始
     const [totalPages, setTotalPages] = useState(0);  // 总页数
     const [amount, setAmount] = useState(5);  // 每页显示的数量
+
+    const navigate = useNavigate();  // 初始化 navigate
+
 
     // const allContexts = [
     //     { id: 1, title: 'Love' },
@@ -106,6 +111,7 @@ const ScriptGenerationPage = () => {
             requestBody.language = language;
         }
 
+
         // 输出请求体以验证构建是否正确
         console.log('Request Body:', requestBody);
 
@@ -122,6 +128,13 @@ const ScriptGenerationPage = () => {
                 console.log('Raw Response:', text);
                 try {
                     const data = JSON.parse(text);  // 尝试将文本转换为 JSON
+                    Modal.success({
+                        title: 'Success',
+                        content: data.message,  // 显示成功提示
+                        onOk: () => {
+                            navigate('/script_management');  // 用户点击OK后跳转到 script_management 页面
+                        }
+                    });
                     console.log('Parsed Data:', data);
                 } catch (error) {
                     console.error('JSON Parsing Error:', error);
