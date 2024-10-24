@@ -48,6 +48,27 @@ public class ContextController {
         return ResponseEntity.status(HttpStatus.OK).body(contextRepository.findPageByKey(keyword, pageable));
     }
 
+    @GetMapping(path="/creator")
+    public ResponseEntity<Page<Context>> getContextByCreator(@RequestParam Integer offset,
+                                                             @RequestParam Integer amount,
+                                                             HttpServletRequest request) {
+        // 获取当前用户的 userId，假设通过 session 获取
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");  // 使用 userId 作为 creator 的查询条件
+
+        // 计算分页参数
+        int page = offset / amount;
+        Pageable pageable = PageRequest.of(page, amount);
+
+        // 使用 userId 作为 creator 查询上下文
+        Page<Context> contexts = contextRepository.findByCreator(userId, pageable);
+
+        // 返回查询结果
+        return ResponseEntity.status(HttpStatus.OK).body(contexts);
+    }
+
+
+
     @GetMapping(path="/{id}")
     public @ResponseBody ResponseEntity<Context> getContext(@PathVariable String id, HttpServletRequest request) {
         Optional<Context> contextOpt = contextRepository.findById(Long.parseLong(id));
