@@ -4,13 +4,11 @@ import lombok.Data;
 
 
 import java.util.List;
-
 @Data
-public class GenerateRequestDTO {
-
+public class EmulateRequestDTO {
     private String name;
     private List<String> contextList;
     private String positive;
     private String negative;
+    private String existingScript;
 }
-
