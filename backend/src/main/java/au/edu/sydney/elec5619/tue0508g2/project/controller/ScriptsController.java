@@ -1,9 +1,6 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
-import au.edu.sydney.elec5619.tue0508g2.project.dto.EmulateRequestDTO;
-import au.edu.sydney.elec5619.tue0508g2.project.dto.GenerateRequestDTO;
-import au.edu.sydney.elec5619.tue0508g2.project.dto.RewriteRequestDTO;
-import au.edu.sydney.elec5619.tue0508g2.project.dto.ScriptScenesDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.*;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptGeneration;
@@ -76,9 +73,7 @@ public class ScriptsController {
                 });
     }
 
-
-
-
+    // emulate
     @PostMapping("/emulate")
     public Mono<String> emulateScript(@RequestBody EmulateRequestDTO requestBody, HttpServletRequest request) {
 //        // 打印收到的请求体内容
@@ -119,8 +114,7 @@ public class ScriptsController {
                 });
     }
 
-
-
+    // rewrite
     @PostMapping("/rewrite")
     public Mono<String> rewriteScript(@RequestBody RewriteRequestDTO requestBody, HttpServletRequest request) {
         // 打印收到的请求体内容
@@ -162,49 +156,49 @@ public class ScriptsController {
                 });
     }
 
-
-
     // translate
     @PostMapping("/translate")
-    public Mono<String> translateScript(@RequestParam String name,
-                                        @RequestParam List<String> contextList,
-                                        @RequestParam String positive,
-                                        @RequestParam String negative,
-                                        @RequestParam String existingScript,
-                                        @RequestParam String language,
-                                        HttpServletRequest request) {
+    public Mono<String> translateScript(@RequestBody TranslateRequestDTO requestBody, HttpServletRequest request) {
+        // 打印收到的请求体内容
+        System.out.println("Received Translate request body: ");
+        System.out.println("Name: " + requestBody.getName());
+        System.out.println("ContextList: " + requestBody.getContextList());
+        System.out.println("Positive: " + requestBody.getPositive());
+        System.out.println("Negative: " + requestBody.getNegative());
+        System.out.println("ExistingScript: " + requestBody.getExistingScript());
+        System.out.println("Language: " + requestBody.getLanguage());
 
         HttpSession session = request.getSession();
         Long userId = (Long) session.getAttribute("userId");
 
-        // For testing, set a default userId if it's not available
-         if (userId == null) {
-             return Mono.just("User not authorized.");
-         }
+        // 如果 userId 为空，返回未授权的响应
+        if (userId == null) {
+            return Mono.just("{\"message\": \"User not authorized.\"}");
+        }
 
-        return scriptGeneration.translateScript(name, contextList, positive, negative, existingScript, language)
+        return scriptGeneration.translateScript(requestBody.getName(), requestBody.getContextList(),
+                        requestBody.getPositive(), requestBody.getNegative(), requestBody.getExistingScript(), requestBody.getLanguage())
                 .flatMap(translatedScript -> {
-                    // 创建新的 Script 对象并保存到数据库
                     Script script = new Script();
-                    script.setCreator(userId);  // 直接设置创建者ID
-//                    script.setCreator(1L);  // test
-                    script.setName(name);       // 设置脚本名称
+                    script.setCreator(userId);
+//                    script.setCreator(1L); // test
+                    script.setName(requestBody.getName());
                     script.setCreateTime(LocalDateTime.now());
                     scriptRepository.save(script);
 
-                    // 保存生成的内容到 ScriptScenes 表
                     ScriptScenes scriptScenes = new ScriptScenes();
-                    scriptScenes.setScript(script);  // 关联 Script 对象
-                    scriptScenes.setScene(1);  // 设置场次编号
-                    scriptScenes.setTitle(name);  // 设置场景标题
-                    scriptScenes.setContent(translatedScript);  // 设置翻译后的内容
-                    scriptScenes.setCreate_time(LocalDateTime.now());  // 创建时间
+                    scriptScenes.setScript(script);
+                    scriptScenes.setScene(1);
+                    scriptScenes.setTitle(requestBody.getName());
+                    scriptScenes.setContent(translatedScript);
+                    scriptScenes.setCreate_time(LocalDateTime.now());
                     scriptScenesRepository.save(scriptScenes);
 
-                    // 返回生成的脚本ID
-                    return Mono.just("Translated script generated with ID: " + script.getId());
+                    // 直接返回脚本 ID 的 JSON 字符串
+                    return Mono.just("{\"message\": \"Translated script generated with ID: " + script.getId() + "\"}");
                 });
     }
+
 
 
 
