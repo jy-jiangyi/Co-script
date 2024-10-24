@@ -7,11 +7,13 @@ import lombok.Setter;
 @Setter
 public class ScriptScenesDTO {
 
+    private long id;
     private int scene;
     private String title;
     private String content;
 
-    public ScriptScenesDTO(int scene, String title, String content) {
+    public ScriptScenesDTO(long id, int scene, String title, String content) {
+        this.id = id;
         this.scene = scene;
         this.title = title;
         this.content = content;

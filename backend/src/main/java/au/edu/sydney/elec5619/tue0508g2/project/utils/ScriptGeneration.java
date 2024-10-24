@@ -85,7 +85,7 @@ public class ScriptGeneration {
 
         AITestRequestBody requestBody = new AITestRequestBody();
 
-        requestBody.setPromot("Please translate the following script into " + language + "\n" + prompt);
+        requestBody.setPromot("Please translate the following script into " + language + "\n" + prompt + "And only return translated script");
 
 
         return aiGemini.textGeneration(requestBody);

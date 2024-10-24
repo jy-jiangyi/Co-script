@@ -44,7 +44,7 @@ public class SceneIllustrationGenerationController {
                     String scriptName = script.getName();
                     List<SceneInfoDTO> scenes = scriptScenesRepository.findByScriptId(scriptId)
                             .stream()
-                            .map(scene -> new SceneInfoDTO(scene.getId(), scene.getScene(), scene.getTitle()))
+                            .map(scene -> new SceneInfoDTO(scene.getId(), scene.getScene(), scene.getTitle(), scene.getContent()))
                             .collect(Collectors.toList());
                     ScriptDetailsDTO dto = new ScriptDetailsDTO(scriptName, scenes);
                     return Mono.just(dto);
@@ -89,11 +89,13 @@ public class SceneIllustrationGenerationController {
         private Long id;
         private int scene;
         private String title;
+        private String content;
 
-        public SceneInfoDTO(Long id, int scene, String title) {
+        public SceneInfoDTO(Long id, int scene, String title, String content) {
             this.id = id;
             this.scene = scene;
             this.title = title;
+            this.content = content;
         }
 
     }

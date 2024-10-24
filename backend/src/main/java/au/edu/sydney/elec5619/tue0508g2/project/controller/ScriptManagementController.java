@@ -6,6 +6,8 @@ import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
 
 import au.edu.sydney.elec5619.tue0508g2.project.utils.ScriptManagement;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +34,8 @@ public class ScriptManagementController {
         this.aiGemini = aiGemini;
     }
 
-    //get scripts short summary
-    @GetMapping("/{scriptId}/scenes/summary")
+    // 获取短摘要的API
+    @GetMapping("/{scriptId}/scenes/summary/short")
     public Mono<ResponseEntity<String>> getScriptScenesSummaryShort(@PathVariable Long scriptId) {
         return scriptManagement.getScriptScenesContentAsString(scriptId)
                 .flatMap(this::summaryShort)
@@ -45,8 +47,8 @@ public class ScriptManagementController {
                 });
     }
 
-    //get scripts long summary
-    @GetMapping("/{scriptId}/scenes/summary")
+    // 获取长摘要的API
+    @GetMapping("/{scriptId}/scenes/summary/long")
     public Mono<ResponseEntity<String>> getScriptScenesSummaryLong(@PathVariable Long scriptId) {
         return scriptManagement.getScriptScenesContentAsString(scriptId)
                 .flatMap(this::summaryLong)
@@ -58,9 +60,9 @@ public class ScriptManagementController {
                 });
     }
 
-    //get short summary for script management page
+    // 内部短摘要方法
     private Mono<String> summaryShort(String text) {
-        String prompt = "please summarize the providing text to less than 20 words." + text;
+        String prompt = "Please summarize the provided text to less than 20 words: " + text;
 
         AITestRequestBody requestBody = new AITestRequestBody();
         requestBody.setPromot(prompt);
@@ -68,9 +70,9 @@ public class ScriptManagementController {
         return aiGemini.textGeneration(requestBody);
     }
 
-    //get long summary for scripts
+    // 内部长摘要方法
     private Mono<String> summaryLong(String text) {
-        String prompt = "please summarize the providing text to less than 500 words." + text;
+        String prompt = "Please summarize the provided text to less than 500 words: " + text;
 
         AITestRequestBody requestBody = new AITestRequestBody();
         requestBody.setPromot(prompt);
@@ -80,7 +82,10 @@ public class ScriptManagementController {
 
     //search scripts
     @PostMapping("/findSimilarScripts")
-    public Mono<ResponseEntity<List<Long>>> findSimilarScripts(@RequestParam Long userId, @RequestBody String text) {
+    public Mono<ResponseEntity<List<Long>>> findSimilarScripts(HttpServletRequest request, @RequestBody String text) {
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+
         return scriptManagement.findSimilarScripts(userId, text)
                 .map(scriptIds -> {
                     if (scriptIds.isEmpty()) {
@@ -97,6 +102,4 @@ public class ScriptManagementController {
                             .<List<Long>>body(null));
                 });
     }
-
-
 }

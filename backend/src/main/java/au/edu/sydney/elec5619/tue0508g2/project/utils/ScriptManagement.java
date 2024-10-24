@@ -5,6 +5,7 @@ import au.edu.sydney.elec5619.tue0508g2.project.entity.ScriptScenes;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AITestRequestBody;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
+import au.edu.sydney.elec5619.tue0508g2.project.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,12 +22,14 @@ public class ScriptManagement {
     private final ScriptScenesRepository scriptScenesRepository;
     private final ScriptRepository scriptRepository;
     private final AIGeminiImpl aiGemini;
+    private final UsersRepository usersRepository;
 
     @Autowired
-    public ScriptManagement(ScriptScenesRepository scriptScenesRepository, ScriptRepository scriptRepository, AIGeminiImpl aiGemini) {
+    public ScriptManagement(ScriptScenesRepository scriptScenesRepository, ScriptRepository scriptRepository, AIGeminiImpl aiGemini, UsersRepository usersRepository) {
         this.scriptScenesRepository = scriptScenesRepository;
         this.scriptRepository = scriptRepository;
         this.aiGemini = aiGemini;
+        this.usersRepository = usersRepository;
     }
 
 //    get content by script id as file
@@ -79,21 +82,21 @@ public class ScriptManagement {
 
 
 
-    // 通过userId查找对应scripts，并与text进行比对
     public Mono<List<Long>> findSimilarScripts(Long userId, String text) {
-        return Mono.fromCallable(() -> scriptRepository.findByCreator(userId))
-                .flatMapMany(Flux::fromIterable)  // 将List<Script>转换为Flux<Script>
+        return Mono.fromCallable(() -> usersRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found")))
+                .flatMapMany(user -> Flux.fromIterable(scriptRepository.findByCreator(user))) // 将List转换为Flux
                 .flatMap(script -> {
-                    Long scriptId = script.getId();  // 获取script ID
+                    Long scriptId = script.getId(); // 获取script ID
                     return getScriptScenesContentAsString(scriptId)
                             .map(content -> new ScriptContent(scriptId, content)); // 创建ScriptContent对象
                 })
                 .collectList()
                 .flatMap(scriptContents -> {
-                    // Step 3: 将text和获取的所有scripts内容组合
+                    // 将text和获取的所有scripts内容整合给AI接口进行比对
                     String combinedText = combineTextWithScripts(text, scriptContents);
 
-                    // Step 4: 调用AI接口进行比对
+                    // 调用AI接口进行比对，返回所有相符的scriptId
                     return callAIForMultipleMatches(combinedText);
                 });
     }

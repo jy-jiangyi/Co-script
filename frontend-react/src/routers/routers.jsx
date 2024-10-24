@@ -1,9 +1,8 @@
 import { Routes, Route, Link } from "react-router-dom";
 
-import CommonLayout from "../layouts/CommonLayout.jsx";
+// import CommonLayout from "../layouts/CommonLayout.jsx";
 import WelcomeLayout from "../layouts/WelcomeLayout.jsx";
 
-import SciptManagementPage from "../pages/ScriptManagementPage.jsx";
 import ContextManagementPage from "../pages/ContextManagementPage.tsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
@@ -12,6 +11,8 @@ import AboutPage from "../pages/AboutPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
 import SceneIllustrationGenerationPage from "../pages/SceneIllustrationGenerationPage.jsx";
 import ScriptEditingPage from "../pages/ScriptEditingPage.jsx"
+import ScriptCreatingPage from "../pages/ScriptCreatingPage.jsx";
+import ScriptManagementPage from "../pages/ScriptManagementPage.jsx";
 
 function ProjectRoutes() {
     return (
@@ -25,8 +26,10 @@ function ProjectRoutes() {
             <Route path="/scene_illustration" element={<WelcomeLayout><SceneIllustrationGenerationPage /></WelcomeLayout>}></Route>
             <Route path="/home" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>
             <Route path="/script_editing" element={<WelcomeLayout><ScriptEditingPage /></WelcomeLayout>}></Route>
+            <Route path="/script_creating" element={<WelcomeLayout><ScriptCreatingPage /></WelcomeLayout>}></Route>
             {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
             {/*<Route path="/" element={<WelcomeLayout><ContextManagementPage /></WelcomeLayout>}></Route>*/}
+            <Route path="/script_management" element={<WelcomeLayout><ScriptManagementPage /></WelcomeLayout>}></Route>
         </Routes>
     );
 }

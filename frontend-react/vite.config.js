@@ -30,7 +30,28 @@ export default defineConfig({
         target: "http://localhost:8080/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/context/, "context"),
-      }
+      },
+      "/generate": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/generate/, "generate"),
+      },
+      "/emulate": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/emulate/, "emulate"),
+      },
+      "/translate": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/translate/, "translate"),
+      },
+      "/rewrite": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/rewrite/, "rewrite"),
+      },
+
     }
   }
 })

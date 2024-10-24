@@ -48,6 +48,32 @@ public class ContextController {
         return ResponseEntity.status(HttpStatus.OK).body(contextRepository.findPageByKey(keyword, pageable));
     }
 
+    @GetMapping(path="/creator")
+    public @ResponseBody ResponseEntity<Page<Context>> getContextByCreator(@RequestParam Integer offset,
+                                                                    @RequestParam Integer amount,
+                                                                    HttpServletRequest request) {
+        // 获取当前用户的 userId，假设通过 session 获取
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");  // 使用 userId 作为 creator 的查询条件
+
+        // 计算分页参数
+        int page = offset / amount;
+        Pageable pageable = PageRequest.of(page, amount);
+
+        // userId = 1l;
+        // 使用 userId 作为 creator 查询上下文
+        Page<Context> contexts = contextRepository.findByCreator(userId, pageable);
+
+        // 输出结果到控制台，方便调试
+        // System.out.println("Retrieved contexts for userId: " + userId);
+        // contexts.forEach(context -> System.out.println("Context ID: " + context.getId() + ", Title: " + context.getTitle()));
+
+        // 返回简单的响应，表明查询已完成
+        return ResponseEntity.status(HttpStatus.OK).body(contexts);
+    }
+
+
+
     @GetMapping(path="/{id}")
     public @ResponseBody ResponseEntity<Context> getContext(@PathVariable String id, HttpServletRequest request) {
         Optional<Context> contextOpt = contextRepository.findById(Long.parseLong(id));
