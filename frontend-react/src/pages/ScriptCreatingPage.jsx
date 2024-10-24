@@ -3,15 +3,26 @@ import React, { useState } from 'react';
 const ScriptGenerationPage = () => {
     const [scriptName, setScriptName] = useState('');
     const [source, setSource] = useState('None');  // 将 source 的初始值设为 "None"
-    const [contexts, setContexts] = useState(['Love', 'Peace']);
+    const [contexts, setContexts] = useState([]);  // 初始值为空，不显示默认上下文
     const [positivePrompt, setPositivePrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
     const [scriptContent, setScriptContent] = useState('');  // 用来管理用户输入的脚本内容
     const [language, setLanguage] = useState('');            // 翻译语言
+    const [isModalOpen, setIsModalOpen] = useState(false);  // 控制弹窗显示状态
 
 
-    const addNewContext = () => {
-        setContexts([...contexts, `Context-${contexts.length + 1}`]);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);  // 打开弹窗
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);  // 关闭弹窗
+    };
+
+
+    const deleteContext = (indexToDelete) => {
+        setContexts(contexts.filter((_, index) => index !== indexToDelete));
     };
 
     const handleGenerateScript = () => {
@@ -100,13 +111,6 @@ const ScriptGenerationPage = () => {
         contextContainer: {
             marginBottom: '20px',
         },
-        contextItem: {
-            display: 'inline-block',
-            backgroundColor: '#f0f0f0',
-            padding: '5px 10px',
-            marginRight: '10px',
-            borderRadius: '4px',
-        },
         button: {
             padding: '5px 10px',
             cursor: 'pointer',
@@ -145,6 +149,46 @@ const ScriptGenerationPage = () => {
             borderRadius: '4px',     // 圆角
             borderColor: '#ccc',     // 边框颜色
             boxSizing: 'border-box', // 让输入框宽度包括内边距
+        },
+        deleteButton: {
+            marginLeft: '5px',
+            backgroundColor: 'transparent',  // 透明背景
+            color: 'red',  // 图标颜色
+            border: 'none',
+            cursor: 'pointer',
+            padding: '2px',
+        },
+        modalOverlay: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',  // 背景半透明
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        modal: {
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            width: '300px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        },
+        contextList: {
+            listStyleType: 'none',
+            padding: 0,
+        },
+        contextItem: {
+            padding: '10px',
+            cursor: 'pointer',
+            backgroundColor: '#f0f0f0',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: '#007bff',
         },
     };
 
@@ -202,10 +246,44 @@ const ScriptGenerationPage = () => {
 
                 <div style={styles.contextContainer}>
                     <label style={styles.label}>Context</label>
-                    {contexts.map((context, index) => (
-                        <span key={index} style={styles.contextItem}>{context}</span>
-                    ))}
-                    <button style={styles.button} onClick={addNewContext}>+ New Context</button>
+                    {contexts.length === 0 ? (
+                        <p>Please add context</p>  // 如果没有上下文，提示用户添加
+                    ) : (
+                        contexts.map((context, index) => (
+                            <span key={index} style={styles.contextItem}>
+                {context}
+                                <button
+                                    style={styles.deleteButton}
+                                    onClick={() => deleteContext(index)}
+                                >
+                            ×
+                </button>
+            </span>
+                        ))
+                    )}
+                    <button style={styles.button} onClick={handleOpenModal}>+ New Context</button>
+
+                    {/* 弹窗 */}
+                    {isModalOpen && (
+                        <div style={styles.modalOverlay}>
+                            <div style={styles.modal}>
+                                <h3>Select a Context from your Library</h3>
+                                <ul style={styles.contextList}>
+                                    {/* 暂时硬编码一些示例上下文 */}
+                                    {['Love', 'Peace', 'Adventure', 'Mystery'].map((context, index) => (
+                                        <li key={index} style={styles.contextItem} onClick={() => {
+                                            setContexts([...contexts, context]);
+                                            handleCloseModal();  // 选择后关闭弹窗
+                                        }}>
+                                            {context}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button style={styles.button} onClick={handleCloseModal}>Close</button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
 
                 <div style={styles.formGroup}>
