@@ -1,5 +1,8 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.EmulateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.GenerateRequestDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.RewriteRequestDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.TranslateRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
@@ -107,6 +110,104 @@ public class ScriptCreatingMvcTests {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().contains("\"message\": \"Generated script with ID:"));
     }
+
+    @Test
+    public void testEmulateScript_Success() {
+        RestTemplate restTemplate = getRestTemplate();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode loginNode = objectMapper.createObjectNode();
+        loginNode.put("email", "test1@gmail.com");
+        loginNode.put("password_hash", "123");
+        String loginResponse = restTemplate.postForObject(path("/users/login"), loginNode, String.class);
+        assertEquals("test1", loginResponse);
+        logger.info("成功登录");
+
+        String url = path("/scripts/emulate");
+        EmulateRequestDTO requestBody = new EmulateRequestDTO();
+        requestBody.setName("Test Emulate Script");
+        requestBody.setContextList(Arrays.asList("Drama", "Action"));
+        requestBody.setPositive("Hero wins");
+        requestBody.setNegative("Villain loses");
+        requestBody.setExistingScript("The hero was in danger, but...");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<EmulateRequestDTO> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        logger.info("Response: {}", response.getBody());
+
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("\"message\": \"Emulated script generated with ID:"));
+    }
+
+    @Test
+    public void testRewriteScript_Success() {
+        RestTemplate restTemplate = getRestTemplate();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode loginNode = objectMapper.createObjectNode();
+        loginNode.put("email", "test1@gmail.com");
+        loginNode.put("password_hash", "123");
+        String loginResponse = restTemplate.postForObject(path("/users/login"), loginNode, String.class);
+        assertEquals("test1", loginResponse);
+        logger.info("成功登录");
+
+        String url = path("/scripts/rewrite");
+        RewriteRequestDTO requestBody = new RewriteRequestDTO();
+        requestBody.setName("Test Rewrite Script");
+        requestBody.setContextList(Arrays.asList("Mystery", "Suspense"));
+        requestBody.setPositive("Resolution achieved");
+        requestBody.setNegative("Unexpected twist");
+        requestBody.setExistingScript("The story began in a small town...");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<RewriteRequestDTO> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        logger.info("Response: {}", response.getBody());
+
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("\"message\": \"Rewritten script generated with ID:"));
+    }
+
+    @Test
+    public void testTranslateScript_Success() {
+        RestTemplate restTemplate = getRestTemplate();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode loginNode = objectMapper.createObjectNode();
+        loginNode.put("email", "test1@gmail.com");
+        loginNode.put("password_hash", "123");
+        String loginResponse = restTemplate.postForObject(path("/users/login"), loginNode, String.class);
+        assertEquals("test1", loginResponse);
+        logger.info("成功登录");
+
+        String url = path("/scripts/translate");
+        TranslateRequestDTO requestBody = new TranslateRequestDTO();
+        requestBody.setName("Test Translate Script");
+        requestBody.setContextList(Arrays.asList("Adventure", "Fantasy"));
+        requestBody.setPositive("Success in journey");
+        requestBody.setNegative("Dangerous obstacles");
+        requestBody.setExistingScript("Once upon a time in a distant land...");
+        requestBody.setLanguage("Spanish");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TranslateRequestDTO> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        logger.info("Response: {}", response.getBody());
+
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("\"message\": \"Translated script generated with ID:"));
+    }
+
 
 
 
