@@ -67,4 +67,37 @@ public class ScriptCreatingTests {
 
     }
 
+    @Test
+    public void testEmulateScript_Success() {
+        // 创建请求 DTO
+        EmulateRequestDTO requestBody = new EmulateRequestDTO();
+        requestBody.setName("Test Emulate Script");
+        requestBody.setContextList(Arrays.asList("Drama", "Action"));
+        requestBody.setPositive("Hero wins");
+        requestBody.setNegative("Villain loses");
+        requestBody.setExistingScript("The hero was in danger, but...");
+
+        // 使用 Mockito 模拟 HttpServletRequest 和 HttpSession
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpSession session = Mockito.mock(HttpSession.class);
+
+        // 模拟 session 中的 userId
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(session.getAttribute("userId")).thenReturn(1L);
+
+        // 调用控制器方法并传递模拟的 HttpServletRequest
+        Mono<String> result = scriptsController.emulateScript(requestBody, request);
+
+        // 验证返回的响应结构
+        StepVerifier.create(result)
+                .expectNextMatches(response -> {
+                    // 验证返回的 JSON 字符串是否包含 "Emulated script generated with ID: "
+                    assertTrue(response.contains("\"message\": \"Emulated script generated with ID: "));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
+
 }
