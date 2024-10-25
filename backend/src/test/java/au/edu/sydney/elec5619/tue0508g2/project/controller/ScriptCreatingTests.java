@@ -1,6 +1,7 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import au.edu.sydney.elec5619.tue0508g2.project.dto.EmulateRequestDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.RewriteRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.GenerateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
@@ -98,6 +99,36 @@ public class ScriptCreatingTests {
                 .verifyComplete();
     }
 
+    @Test
+    public void testRewriteScript_Success() {
+        // 创建请求 DTO
+        RewriteRequestDTO requestBody = new RewriteRequestDTO();
+        requestBody.setName("Test Rewrite Script");
+        requestBody.setContextList(Arrays.asList("Mystery", "Suspense"));
+        requestBody.setPositive("Resolution achieved");
+        requestBody.setNegative("Unexpected twist");
+        requestBody.setExistingScript("The story began in a small town...");
+
+        // 使用 Mockito 模拟 HttpServletRequest 和 HttpSession
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpSession session = Mockito.mock(HttpSession.class);
+
+        // 模拟 session 中的 userId
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(session.getAttribute("userId")).thenReturn(1L);
+
+        // 调用控制器方法并传递模拟的 HttpServletRequest
+        Mono<String> result = scriptsController.rewriteScript(requestBody, request);
+
+        // 验证返回的响应结构
+        StepVerifier.create(result)
+                .expectNextMatches(response -> {
+                    // 验证返回的 JSON 字符串是否包含 "Rewritten script generated with ID: "
+                    assertTrue(response.contains("\"message\": \"Rewritten script generated with ID: "));
+                    return true;
+                })
+                .verifyComplete();
+    }
 
 
 }
