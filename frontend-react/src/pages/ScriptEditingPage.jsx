@@ -177,7 +177,7 @@ const ScriptDemo1 = () => {
                     setEditorContent(scene.content); // Set editor content
                   }}
                 >
-                  Scene {scene.id}: {scene.title}
+                  Scene {scene.scene}: {scene.title}
                 </Menu.Item>
               ))}
             </Menu>
