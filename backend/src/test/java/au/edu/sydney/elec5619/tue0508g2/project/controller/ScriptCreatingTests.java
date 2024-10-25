@@ -2,6 +2,7 @@ package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import au.edu.sydney.elec5619.tue0508g2.project.dto.EmulateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.RewriteRequestDTO;
+import au.edu.sydney.elec5619.tue0508g2.project.dto.TranslateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.Script;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.GenerateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
@@ -125,6 +126,38 @@ public class ScriptCreatingTests {
                 .expectNextMatches(response -> {
                     // 验证返回的 JSON 字符串是否包含 "Rewritten script generated with ID: "
                     assertTrue(response.contains("\"message\": \"Rewritten script generated with ID: "));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testTranslateScript_Success() {
+        // 创建请求 DTO
+        TranslateRequestDTO requestBody = new TranslateRequestDTO();
+        requestBody.setName("Test Translate Script");
+        requestBody.setContextList(Arrays.asList("Adventure", "Fantasy"));
+        requestBody.setPositive("Success in journey");
+        requestBody.setNegative("Dangerous obstacles");
+        requestBody.setExistingScript("Once upon a time in a distant land...");
+        requestBody.setLanguage("Spanish");
+
+        // 使用 Mockito 模拟 HttpServletRequest 和 HttpSession
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpSession session = Mockito.mock(HttpSession.class);
+
+        // 模拟 session 中的 userId
+        Mockito.when(request.getSession()).thenReturn(session);
+        Mockito.when(session.getAttribute("userId")).thenReturn(1L);
+
+        // 调用控制器方法并传递模拟的 HttpServletRequest
+        Mono<String> result = scriptsController.translateScript(requestBody, request);
+
+        // 验证返回的响应结构
+        StepVerifier.create(result)
+                .expectNextMatches(response -> {
+                    // 验证返回的 JSON 字符串是否包含 "Translated script generated with ID: "
+                    assertTrue(response.contains("\"message\": \"Translated script generated with ID: "));
                     return true;
                 })
                 .verifyComplete();
