@@ -31,39 +31,18 @@ public class ContextMvcTests {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private MvcTools mvcTools;
+
     private static final Logger logger = LoggerFactory.getLogger(ContextMvcTests.class);
 
-    private String path(String uri){
-        return "http://localhost:" + port + uri;
-    }
-
-    private RestTemplate getRestTemplate(){
-        CookieStore cookieStore = new BasicCookieStore();
-
-        // 2. 创建 HttpClient，并配置 CookieStore
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultCookieStore(cookieStore)
-                .build();
-
-        // 3. 将 HttpClient 与 RestTemplate 结合
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        return new RestTemplate(factory);
-    }
-
     @Test
-    public void contextCreateFetchUpdateDelete() {
-        RestTemplate restTemplate = getRestTemplate();
+    public void contextCreate() {
+        mvcTools.setPort(port);
+        RestTemplate restTemplate = mvcTools.getRestTemplate();
         // login first
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode loginNode = objectMapper.createObjectNode();
-        loginNode.put("username", "admin");
-        assertEquals("{\"username\":\"admin\"}", loginNode.toString());
-        loginNode.removeAll();
-        loginNode.put("email", "test1@gmail.com");
-        loginNode.put("password_hash", "123");
-        String response = restTemplate.postForObject(path("/users/login"), loginNode, String.class);
-        assertEquals("test1", response);
-        response = restTemplate.getForObject(path("/users/name"), String.class);
+        mvcTools.login(restTemplate);
+        String response = restTemplate.getForObject(mvcTools.path("/users/name"), String.class);
         assertEquals("test1", response);
     }
 
