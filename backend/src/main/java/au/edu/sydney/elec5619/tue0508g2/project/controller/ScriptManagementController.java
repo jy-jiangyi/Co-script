@@ -16,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.nio.file.FileStore;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/script_management")
@@ -122,6 +125,35 @@ public class ScriptManagementController {
 
         List<ScriptSummaryDTO> scripts = scriptManagement.findAllScriptsByUserId(userId);
         return ResponseEntity.ok(scripts);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<Long>> searchScript(@RequestBody Map<String, String> request, HttpSession session) {
+        String text = request.get("text");
+
+        // 获取用户ID
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body(null);
+        }
+
+        // 输出收到的搜索文本和用户ID
+        System.out.println("Received search text: " + text);
+        System.out.println("User ID: " + userId);
+
+        // 查询符合条件的 script
+        List<Script> scripts = scriptRepository.findByCreatorAndNameContaining(userId, text);
+
+        // 提取符合条件的 script 的 ID
+        List<Long> scriptIds = scripts.stream()
+                .map(Script::getId)
+                .collect(Collectors.toList());
+
+        System.out.println("Found script IDs: " + scriptIds);
+
+        // 返回符合条件的 script ID 列表
+        return ResponseEntity.ok(scriptIds);
     }
 
 

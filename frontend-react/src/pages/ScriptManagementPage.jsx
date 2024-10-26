@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Input, Row, Col, Upload, Card, Button, message } from 'antd';
+import { Layout, Input, Row, Col, Upload, Card, Button, message, Modal } from 'antd';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import ScriptCard from '../components/ScriptCard';
 import UploadFailModal from '../components/UploadFailModal';
-import UploadSuccessModal from '../components/UploadSuccessModal';
 import DownloadFailModal from '../components/DownloadFailModal';
 import DownloadSuccessModal from '../components/DownloadSuccessModal';
 import DownloadModal from '../components/DownloadModal';
@@ -14,8 +13,12 @@ const { Content } = Layout;
 const { Search } = Input;
 
 const ScriptManagementPage = () => {
-    const [scripts, setScripts] = useState([]);
+    const [scripts, setScripts] = useState([]);  // 所有脚本数据
+    const [filteredScripts, setFilteredScripts] = useState([]);  // 存储过滤后的脚本数据
+    const [fileContent, setFileContent] = useState('');
+    const [newFileName, setNewFileName] = useState('');
     const navigate = useNavigate();
+    const [searchResults, setSearchResults] = useState([]);  // 存储搜索结果的scriptId
 
     // Modal visibility state
     const [isUploadFailVisible, setUploadFailVisible] = useState(false);
@@ -30,6 +33,7 @@ const ScriptManagementPage = () => {
             try {
                 const response = await axios.post('/api/script_management/findAllScripts');
                 setScripts(response.data);
+                setFilteredScripts(response.data);  // 初始化时显示所有脚本
                 console.log(response.data);
             } catch (error) {
                 console.error('Error fetching scripts:', error);
@@ -43,21 +47,73 @@ const ScriptManagementPage = () => {
     // Handle search
     const handleSearch = async (text) => {
         try {
-            console.log(`Searching scripts for: ${text}`);
-            // In actual development, you might use axios to search scripts
-            message.success('搜索成功');
+            // 调用后端搜索接口
+            const response = await axios.post('/api/script_management/search', { text });
+
+            if (response.status === 200) {
+                const scriptIds = response.data;
+                console.log("Received script IDs: ", scriptIds); // 输出返回的ID列表
+                setSearchResults(scriptIds); // 更新状态
+
+                // 根据搜索结果过滤脚本数据
+                const results = scripts.filter(script => scriptIds.includes(script.id));
+                setFilteredScripts(results);  // 更新显示的脚本
+                message.success('搜索成功');
+            } else {
+                message.error('搜索失败，请重试');
+            }
         } catch (error) {
             console.error('搜索失败：', error);
             message.error('搜索失败，请重试');
         }
     };
 
+    // Validate file type before upload
+    const beforeUpload = (file) => {
+        const isTxt = file.type === 'text/plain';
+        if (!isTxt) {
+            message.error('只能上传TXT文件！');
+            return Upload.LIST_IGNORE; // 阻止上传
+        }
+        return true;
+    };
+
     // Handle file upload
     const handleFileUpload = (info) => {
-        if (info.file.status === 'done') {
+        const file = info.file.originFileObj;
+        if (info.file.status === 'done' || file) {
+            // 使用 FileReader 读取文件内容
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                setFileContent(content); // 设置文件内容
+                setNewFileName(file.name); // 默认文件名
+                setUploadSuccessVisible(true); // 显示成功上传的弹窗
+            };
+            reader.readAsText(file);
             message.success(`${info.file.name} 文件上传成功`);
         } else if (info.file.status === 'error') {
             message.error(`${info.file.name} 文件上传失败`);
+        }
+    };
+
+    // Handle rename and save
+    const handleRenameAndSave = async () => {
+        if (!newFileName) {
+            message.error('请输入新的文件名！');
+            return;
+        }
+
+        try {
+            await axios.post('/api/upload/saveFile', {
+                fileName: newFileName,
+                content: fileContent,
+            });
+            message.success('文件名和内容已成功发送！');
+            setUploadSuccessVisible(false);
+        } catch (error) {
+            message.error('文件名和内容发送失败！');
+            console.error(error);
         }
     };
 
@@ -69,7 +125,7 @@ const ScriptManagementPage = () => {
                     <Col span={16}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                             <Search
-                                placeholder="Please describe the Scripts you want to browse!"
+                                placeholder="Please enter the script name!"
                                 onSearch={handleSearch}
                                 enterButton
                                 style={{ width: '100%', marginLeft: '20px' }}
@@ -80,9 +136,12 @@ const ScriptManagementPage = () => {
                     <Col span={8}>
                         <Upload.Dragger
                             name="files"
-                            multiple
+                            multiple={false}  // 只允许上传一个文件
                             action="/api/upload"
+                            beforeUpload={beforeUpload}  // 验证文件类型
                             onChange={handleFileUpload}
+                            accept=".txt"  // 限制上传文件类型为 .txt
+                            showUploadList={false}
                             className="upload-dragger"
                             style={{ height: '100px', width: '360px' }}
                         >
@@ -91,7 +150,7 @@ const ScriptManagementPage = () => {
                             </p>
                             <p className="ant-upload-text">Click or drag file to this area to upload</p>
                             <p className="ant-upload-hint">
-                                Support for single or bulk upload. Do not upload sensitive data.
+                                Only .txt files are supported.
                             </p>
                         </Upload.Dragger>
                     </Col>
@@ -121,7 +180,7 @@ const ScriptManagementPage = () => {
                     </Col>
 
                     {/* Dynamic rendering of script cards */}
-                    {scripts.map((script) => (
+                    {filteredScripts.map((script) => (
                         <Col span={6} key={script.id}>
                             <ScriptCard
                                 title={script.name}
@@ -132,38 +191,30 @@ const ScriptManagementPage = () => {
                     ))}
                 </Row>
 
-                {/* Test 5 components */}
-                <Row justify="center" gutter={[16, 16]} style={{ marginTop: '40px' }}>
-                    <Col>
-                        <Button type="primary" onClick={() => setUploadFailVisible(true)}>
-                            Show Upload Fail
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button type="primary" onClick={() => setUploadSuccessVisible(true)}>
-                            Show Upload Success
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button type="primary" onClick={() => setDownloadFailVisible(true)}>
-                            Show Download Fail
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button type="primary" onClick={() => setDownloadSuccessVisible(true)}>
-                            Show Download Success
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button type="primary" onClick={() => setDownloadModalVisible(true)}>
-                            Show Download Modal
-                        </Button>
-                    </Col>
-                </Row>
+                {/* Upload success modal */}
+                <Modal
+                    visible={isUploadSuccessVisible}
+                    title="Successfully uploaded"
+                    onCancel={() => setUploadSuccessVisible(false)}
+                    footer={[
+                        <Button key="back" onClick={() => setUploadSuccessVisible(false)}>
+                            Cancel
+                        </Button>,
+                        <Button key="submit" type="primary" onClick={handleRenameAndSave}>
+                            Done
+                        </Button>,
+                    ]}
+                >
+                    <p>Please rename the file!</p>
+                    <Input
+                        placeholder="Input a new file name"
+                        value={newFileName}
+                        onChange={(e) => setNewFileName(e.target.value)}
+                    />
+                </Modal>
 
                 {/* Modals for testing */}
                 <UploadFailModal visible={isUploadFailVisible} onClose={() => setUploadFailVisible(false)} />
-                <UploadSuccessModal visible={isUploadSuccessVisible} onClose={() => setUploadSuccessVisible(false)} />
                 <DownloadFailModal visible={isDownloadFailVisible} onClose={() => setDownloadFailVisible(false)} />
                 <DownloadSuccessModal visible={isDownloadSuccessVisible} onClose={() => setDownloadSuccessVisible(false)} />
                 <DownloadModal visible={isDownloadModalVisible} onClose={() => setDownloadModalVisible(false)} />

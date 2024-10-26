@@ -13,7 +13,7 @@ const UploadFailModal = ({ visible, onClose }) => {
         >
             <div style={{ textAlign: 'center' }}>
                 <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f' }} />
-                <p>The selected file is not a script!!!</p>
+                <p>The selected file can not be decoded!!!</p>
                 <Button type="primary" onClick={onClose}>
                     Cancel
                 </Button>
