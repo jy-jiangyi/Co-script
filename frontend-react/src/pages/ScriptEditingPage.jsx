@@ -30,7 +30,7 @@ const ScriptDemo1 = () => {
   // For adding/editing scene
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newSceneTitle, setNewSceneTitle] = useState("");
-  
+
   // For deleting a scene
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [sceneToDelete, setSceneToDelete] = useState(null); // For deleting a scene
@@ -77,7 +77,14 @@ const ScriptDemo1 = () => {
         key: "scene-illustration",
         label: <Link to="/scene_illustration">Scene Illustration</Link>,
       },
-      { key: "AI-continuation", label: "AI Continuation" },
+      {
+        key: "AI-continuation",
+        label: (
+          <Button type="primary" onClick={showAIContinuationModal}>
+            AI Continuation
+          </Button>
+        ),
+      },
     ];
 
     return (
@@ -198,6 +205,28 @@ const ScriptDemo1 = () => {
     setIsModalVisible(true); // Show modal
   };
 
+  // Show modal for AI continuation
+  const [isAIContinuationModalVisible, setIsAIContinuationModalVisible] = useState(false);
+  const [selectedScene2, setSelectedScene2] = useState(null);
+  const [positivePrompt, setPositivePrompt] = useState("");
+  const [negativePrompt, setNegativePrompt] = useState("");
+
+  const showAIContinuationModal = () => {
+    setIsAIContinuationModalVisible(true);
+  };
+
+  const handleAIContinuationModalOk = () => {
+    // Handle AI continuation logic
+    console.log("Selected Scene:", selectedScene2);
+    console.log("Positive Prompt:", positivePrompt);
+    console.log("Negative Prompt:", negativePrompt);
+    setIsAIContinuationModalVisible(false);
+  };
+
+  const handleAIContinuationModalCancel = () => {
+    setIsAIContinuationModalVisible(false);
+  };
+
   return (
     <Layout>
       <Content style={{ padding: "0 48px" }}>
@@ -229,9 +258,9 @@ const ScriptDemo1 = () => {
                   }}>
                     Scene {scene.scene}: {scene.title}
                   </span>
-                  <Button 
-                    type="link" 
-                    onClick={() => showModal(scene)} 
+                  <Button
+                    type="link"
+                    onClick={() => showModal(scene)}
                     style={{ marginLeft: 8 }}
                   >
                     Edit
@@ -333,6 +362,42 @@ const ScriptDemo1 = () => {
               <Button type="primary" onClick={confirmDeleteScene}>
                 Confirm Delete
               </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Modal for AI Continuation */}
+        <Modal
+          title="AI Continuation"
+          visible={isAIContinuationModalVisible}
+          onOk={handleAIContinuationModalOk}
+          onCancel={handleAIContinuationModalCancel}
+        >
+          <Form>
+            <Form.Item label="Select Scene">
+              <Select
+                placeholder="Select Scene"
+                onChange={(value) => setSelectedScene2(value)}
+                style={{ width: "100%" }}
+              >
+                {scenes.map((scene) => (
+                  <Select.Option key={scene.id} value={scene.id}>
+                    Scene {scene.scene}: {scene.title}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label="Positive Prompt">
+              <Input
+                value={positivePrompt}
+                onChange={(e) => setPositivePrompt(e.target.value)}
+              />
+            </Form.Item>
+            <Form.Item label="Negative Prompt">
+              <Input
+                value={negativePrompt}
+                onChange={(e) => setNegativePrompt(e.target.value)}
+              />
             </Form.Item>
           </Form>
         </Modal>
