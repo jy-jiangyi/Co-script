@@ -118,12 +118,12 @@ public class ScriptsController {
     @PostMapping("/rewrite")
     public Mono<String> rewriteScript(@RequestBody RewriteRequestDTO requestBody, HttpServletRequest request) {
         // 打印收到的请求体内容
-        System.out.println("Received Rewrite request body: ");
-        System.out.println("Name: " + requestBody.getName());
-        System.out.println("ContextList: " + requestBody.getContextList());
-        System.out.println("Positive: " + requestBody.getPositive());
-        System.out.println("Negative: " + requestBody.getNegative());
-        System.out.println("ExistingScript: " + requestBody.getExistingScript());
+//        System.out.println("Received Rewrite request body: ");
+//        System.out.println("Name: " + requestBody.getName());
+//        System.out.println("ContextList: " + requestBody.getContextList());
+//        System.out.println("Positive: " + requestBody.getPositive());
+//        System.out.println("Negative: " + requestBody.getNegative());
+//        System.out.println("ExistingScript: " + requestBody.getExistingScript());
 
         HttpSession session = request.getSession();
         Long userId = (Long) session.getAttribute("userId");
@@ -160,13 +160,13 @@ public class ScriptsController {
     @PostMapping("/translate")
     public Mono<String> translateScript(@RequestBody TranslateRequestDTO requestBody, HttpServletRequest request) {
         // 打印收到的请求体内容
-        System.out.println("Received Translate request body: ");
-        System.out.println("Name: " + requestBody.getName());
-        System.out.println("ContextList: " + requestBody.getContextList());
-        System.out.println("Positive: " + requestBody.getPositive());
-        System.out.println("Negative: " + requestBody.getNegative());
-        System.out.println("ExistingScript: " + requestBody.getExistingScript());
-        System.out.println("Language: " + requestBody.getLanguage());
+//        System.out.println("Received Translate request body: ");
+//        System.out.println("Name: " + requestBody.getName());
+//        System.out.println("ContextList: " + requestBody.getContextList());
+//        System.out.println("Positive: " + requestBody.getPositive());
+//        System.out.println("Negative: " + requestBody.getNegative());
+//        System.out.println("ExistingScript: " + requestBody.getExistingScript());
+//        System.out.println("Language: " + requestBody.getLanguage());
 
         HttpSession session = request.getSession();
         Long userId = (Long) session.getAttribute("userId");
