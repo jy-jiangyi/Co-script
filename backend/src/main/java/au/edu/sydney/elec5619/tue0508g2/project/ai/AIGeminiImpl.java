@@ -47,6 +47,7 @@ public class AIGeminiImpl implements AIAgent{
                             .getFirst().getText();
 
                 })
+                .retry(5)
                 .onErrorResume(e -> {
                     return Mono.just(e.toString());
                 });

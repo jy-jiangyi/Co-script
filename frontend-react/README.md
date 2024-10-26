@@ -7,7 +7,8 @@ get into /frontend-react.
 2. install react-router-dom@6 `npm install react-router-dom@6`
 3. install ant-design: Run `npm install antd --save`
 4. install icons package: Run `npm install ant-design-icons --save`
-5. `npm rebuild`
+5. `npm install styled-components`
+6. `npm rebuild`
 
 ## 2 update dependency
 `npm rebuild`

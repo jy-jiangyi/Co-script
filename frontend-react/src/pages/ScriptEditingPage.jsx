@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Menu, Layout, Breadcrumb, theme } from "antd";
+import { Menu, Layout, Breadcrumb, theme, Tabs, Button } from "antd";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-import { Tabs, Button } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
+import ReactQuill from "react-quill"; // Import ReactQuill
+import "react-quill/dist/quill.snow.css"; // Import styles
+import { marked } from "marked"; // Import marked for Markdown conversion
 
-const { Header, Content, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const ScriptDemo1 = () => {
   const {
@@ -22,6 +24,8 @@ const ScriptDemo1 = () => {
   const [scenes, setScenes] = useState([]);
   const [selectedScene, setSelectedScene] = useState(null);
   const [redirect, setRedirect] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editorContent, setEditorContent] = useState(""); // For storing editor content
 
   const location = useLocation();
 
@@ -53,7 +57,14 @@ const ScriptDemo1 = () => {
       { key: 'transition', label: 'Transition' },
       { key: 'general', label: 'General' },
       { key: 'action', label: 'Action' },
-      { key: 'editing', label: 'Editing' },
+      {
+        key: 'editing',
+        label: (
+          <Button type="primary" onClick={toggleEditing}>
+            {editing ? "Save" : "Edit"}
+          </Button>
+        ),
+      },
       {
         key: 'scene-illustration',
         label: (
@@ -101,14 +112,52 @@ const ScriptDemo1 = () => {
     return <Navigate to="/scene_illustration" />;
   }
 
+  // Toggle editing state
+  const toggleEditing = () => {
+    setEditing((prevEditing) => {
+      const newEditing = !prevEditing; // Toggle current state
+      if (newEditing) {
+        // Enter edit mode
+        if (selectedScene) {
+            const htmlContent = marked(selectedScene.content);
+            setEditorContent(htmlContent); // Set editor content to Markdown
+        }
+      } else {
+        // Save content when exiting edit mode
+        saveSceneContent();
+      }
+      return newEditing; // Return new state
+    });
+  };
+
+  // Save scene content
+  const saveSceneContent = async () => {
+    if (selectedScene) {
+      try {
+        // Directly send editorContent, ensure it's a string
+        await axios.put(`/api/script_scenes/update_content/${selectedScene.id}`, editorContent, {
+          headers: {
+            'Content-Type': 'text/plain', // Indicate pure text to backend
+          },
+        });
+        // Optionally update selectedScene's content
+        setSelectedScene(prev => ({ ...prev, content: editorContent })); 
+      } catch (error) {
+        console.error("Error saving scene content:", error);
+      }
+    }
+  };
+
   return (
     <Layout>
       <Content style={{ padding: "0 48px" }}>
         <Breadcrumb style={{ margin: "16px 0" }}>
-          <Breadcrumb.Item href="#/home">
+        <Breadcrumb.Item>
+            <Link to="/home">
             <HomeOutlined />
             <span>Home</span>
-          </Breadcrumb.Item>
+            </Link>
+        </Breadcrumb.Item>
           <Breadcrumb.Item>Script Editing</Breadcrumb.Item>
         </Breadcrumb>
         <div>
@@ -125,7 +174,10 @@ const ScriptDemo1 = () => {
               {scenes.map((scene) => (
                 <Menu.Item
                   key={scene.id}
-                  onClick={() => setSelectedScene(scene)}
+                  onClick={() => {
+                    setSelectedScene(scene);
+                    setEditorContent(scene.content); // Set editor content
+                  }}
                 >
                   Scene {scene.id}: {scene.title}
                 </Menu.Item>
@@ -146,24 +198,32 @@ const ScriptDemo1 = () => {
             {selectedScene && (
               <div>
                 <h2>{selectedScene.title}</h2>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw, rehypeHighlight]}
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
-                        <pre data-language={match[1]}>
+                {editing ? (
+                  <ReactQuill
+                    value={editorContent}
+                    onChange={setEditorContent}
+                    style={{ height: "300px" }} // Set height
+                  />
+                ) : (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        return !inline && match ? (
+                          <pre data-language={match[1]}>
+                            <code {...props}>{children}</code>
+                          </pre>
+                        ) : (
                           <code {...props}>{children}</code>
-                        </pre>
-                      ) : (
-                        <code {...props}>{children}</code>
-                      );
-                    },
-                  }}
-                >
-                  {selectedScene.content}
-                </ReactMarkdown>
+                        );
+                      },
+                    }}
+                  >
+                    {selectedScene.content}
+                  </ReactMarkdown>
+                )}
               </div>
             )}
           </Content>
