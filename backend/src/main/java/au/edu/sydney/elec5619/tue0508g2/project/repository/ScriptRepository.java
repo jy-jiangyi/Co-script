@@ -5,6 +5,7 @@ import org.apache.catalina.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -13,5 +14,7 @@ public interface ScriptRepository extends CrudRepository<Script, Long> {
     @Query(value = "SELECT name FROM scripts WHERE id = :id", nativeQuery = true)
     String getScriptNameById(@Param("id") Long id);
 
-    List<Script> findByCreator(Users creatorId);
+    List<Script> findByCreator(Long creatorId);
+
+    List<Script> findByCreatorAndNameContaining(Long creator, String text);
 }

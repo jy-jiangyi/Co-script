@@ -20,21 +20,38 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 public class FileDownloadController {
 
     @GetMapping("/download/{scriptId}")
-    public ResponseEntity<InputStreamResource> downloadScript(@PathVariable Long scriptId, @RequestParam int format) {
+    public ResponseEntity<InputStreamResource> downloadScript(
+            @PathVariable Long scriptId, @RequestParam int format) {
+
+        // 根据 scriptId 和格式生成对应的文件数据
         byte[] data = generateFileBasedOnFormat(scriptId, format);
         String filename = "script." + getExtension(format);
 
+        // 创建 InputStreamResource 来传递文件内容
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(data));
 
+        // 返回下载的 ResponseEntity
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(getMediaType(format))
+                .contentType(getMediaType(format))  // 设置正确的 Content-Type
+                .contentLength(data.length)  // 设置文件长度
                 .body(resource);
+    }
+
+    // 获取对应格式的 MediaType
+    private MediaType getMediaType(int format) {
+        return switch (format) {
+            case 1 -> MediaType.APPLICATION_PDF;
+            case 2 -> MediaType.IMAGE_JPEG;
+            case 3 -> MediaType.TEXT_PLAIN;
+            default -> MediaType.APPLICATION_OCTET_STREAM; // 默认二进制流类型
+        };
     }
 
     private byte[] generateFileBasedOnFormat(Long scriptId, int format) {
@@ -73,6 +90,7 @@ public class FileDownloadController {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             document.save(outputStream);
+            document.close();  // 确保文档正确关闭
             return outputStream.toByteArray();
         }
     }
@@ -86,19 +104,22 @@ public class FileDownloadController {
         g2d.fillRect(0, 0, 300, 200);
         g2d.setColor(Color.BLACK);
         g2d.drawString("Script ID: " + scriptId, 50, 100);
-        g2d.dispose();
+        g2d.dispose();  // 释放图像资源
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "jpeg", outputStream);
+        outputStream.flush();  // 确保输出流刷新
         return outputStream.toByteArray();
     }
+
 
     // TXT生成
     private byte[] generateTxt(Long scriptId) {
         // 模拟脚本内容
         String content = "This is the content for script ID: " + scriptId;
-        return content.getBytes();
+        return content.getBytes(StandardCharsets.UTF_8);  // 确保使用UTF-8编码
     }
+
 
     private String getExtension(int format) {
         return switch (format) {
@@ -109,12 +130,12 @@ public class FileDownloadController {
         };
     }
 
-    private MediaType getMediaType(int format) {
-        return switch (format) {
-            case 1 -> MediaType.APPLICATION_PDF;
-            case 2 -> MediaType.IMAGE_JPEG;
-            case 3 -> MediaType.TEXT_PLAIN;
-            default -> throw new IllegalArgumentException("Unsupported format");
-        };
-    }
+//    private MediaType getMediaType(int format) {
+//        return switch (format) {
+//            case 1 -> MediaType.APPLICATION_PDF;
+//            case 2 -> MediaType.IMAGE_JPEG;
+//            case 3 -> MediaType.TEXT_PLAIN;
+//            default -> throw new IllegalArgumentException("Unsupported format");
+//        };
+//    }
 }

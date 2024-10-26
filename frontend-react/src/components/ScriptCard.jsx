@@ -1,17 +1,52 @@
 import React, { useState } from 'react';
-import { Card, Button, Row, Col } from 'antd';
+import { Card, Button, Row, Col, message } from 'antd';
 import { DownloadOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import StyleAnalysisModal from './StyleAnalysisModal';
+import axios from 'axios';
+import DownloadModal from "./DownloadModal.jsx";
+import {useNavigate} from "react-router-dom";
 
-const ScriptCard = ({ title, description, analysis }) => {
+const ScriptCard = ({ title, description, scriptId }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isDownloadModalVisible, setDownloadModalVisible] = useState(false); // 控制DownloadModal的可见性
+    const [longSummary, setLongSummary] = useState('');
+    const navigate = useNavigate(); // 初始化navigate
 
-    const showModal = () => {
+
+    const showModal = async () => {
+        console.log('scriptId:', scriptId); // 检查scriptId的值
+        console.log('tltle:', title);
+
+        if (!scriptId) {
+            console.error('scriptId is undefined');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`/api/script_management/scripts/${scriptId}/scenes/summary/long`);
+            setLongSummary(response.data);
+        } catch (error) {
+            console.error('Error fetching long summary:', error);
+            message.error('获取长 summary 失败');
+        }
+
         setIsModalVisible(true);
     };
 
     const closeModal = () => {
         setIsModalVisible(false);
+    };
+
+    const showDownloadModal = () => {
+        setDownloadModalVisible(true); // 显示DownloadModal
+    };
+
+    const closeDownloadModal = () => {
+        setDownloadModalVisible(false); // 关闭DownloadModal
+    };
+
+    const handleMoreClick = () => {
+        navigate('/script_editing', { state: { scriptId } });
     };
 
     return (
@@ -38,13 +73,14 @@ const ScriptCard = ({ title, description, analysis }) => {
                     <Button
                         type="link"
                         style={{ paddingTop: '5px', margin: '0', textAlign: 'right' }}
+                        onClick={handleMoreClick} // 点击时触发跳转
                     >
                         More
                     </Button>
                 </div>
 
                 {/* description */}
-                <div style={{ paddingTop: '5px', height: '145px' }}>
+                <div style={{ paddingTop: '5px', height: '145px', overflow: 'hidden' }}>
                     <p>{description}</p>
                 </div>
 
@@ -63,6 +99,7 @@ const ScriptCard = ({ title, description, analysis }) => {
                                 type="link"
                                 icon={<DownloadOutlined />}
                                 style={{ width: '100%', textAlign: 'center' }}
+                                onClick={showDownloadModal} // 点击后显示DownloadModal
                             >
                                 Download
                             </Button>
@@ -85,8 +122,16 @@ const ScriptCard = ({ title, description, analysis }) => {
             <StyleAnalysisModal
                 visible={isModalVisible}
                 onClose={closeModal}
-                script={title}
-                analysis={analysis}
+                scriptTitle={title}
+                scriptAnalysis={description}  // 上部显示 short summary
+                longSummary={longSummary}// 下部显示 long summary
+                scriptId={scriptId}
+            />
+
+            <DownloadModal
+                visible={isDownloadModalVisible}
+                onClose={closeDownloadModal}
+                scriptId={scriptId} // 传递 scriptId
             />
         </>
     );

@@ -1,13 +1,45 @@
-import React from 'react';
-import { Modal, Button, Row, Col, Typography } from 'antd';
-import {DownloadOutlined} from "@ant-design/icons";
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Typography, message } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import DownloadModal from "./DownloadModal.jsx";
 
 const { Title, Paragraph } = Typography;
 
-const StyleAnalysisModal = ({ visible, onClose, script }) => {
+const StyleAnalysisModal = ({ visible, onClose, scriptTitle, scriptAnalysis, longSummary, scriptId }) => {
+    const title = scriptTitle || 'Unknown Title';
+    const shortAnalysis = scriptAnalysis || 'No analysis available.';
+    const longAnalysis = longSummary || 'No long summary available.';
+    const navigate = useNavigate();
+    const [isDownloadModalVisible, setDownloadModalVisible] = useState(false);
+
+    // 打印 scriptId 以确认是否正确传递
+    useEffect(() => {
+        console.log('Received scriptId:', scriptId);
+    }, [scriptId]);
+
+    const handleMoreClick = () => {
+        if (scriptId) {
+            navigate('/script_editing', { state: { scriptId } });
+        } else {
+            message.error('未找到有效的 scriptId');
+        }
+    };
+
+    const showDownloadModal = () => {
+        if (!scriptId) {
+            message.error('scriptId 不存在，无法下载');
+            return;
+        }
+        setDownloadModalVisible(true);
+    };
+
+    const closeDownloadModal = () => {
+        setDownloadModalVisible(false);
+    };
+
     return (
         <Modal
-            title="Title"
             visible={visible}
             onCancel={onClose}
             footer={null}
@@ -21,7 +53,6 @@ const StyleAnalysisModal = ({ visible, onClose, script }) => {
             }}
             centered
         >
-            {/* 上部区域 */}
             <div
                 style={{
                     display: 'flex',
@@ -33,15 +64,22 @@ const StyleAnalysisModal = ({ visible, onClose, script }) => {
                     boxSizing: 'border-box'
                 }}
             >
-                <Title level={4} style={{margin: 0}}>
-                    {script.title}
+                <Title level={4} style={{ margin: 0 }}>
+                    {title}
                 </Title>
-                <Paragraph style={{margin: 0}}>
-                    简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述
+                <Paragraph
+                    style={{
+                        margin: 0,
+                        maxWidth: '50%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    {shortAnalysis}
                 </Paragraph>
             </div>
 
-            {/* 中部区域 */}
             <div
                 style={{
                     height: '450px',
@@ -52,14 +90,9 @@ const StyleAnalysisModal = ({ visible, onClose, script }) => {
                 }}
             >
                 <Title level={5}>Analysis:</Title>
-                {/*<Paragraph>{script.analysis}</Paragraph>*/}
-                <Paragraph>
-                    简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述简短描述
-                </Paragraph>
-
+                <Paragraph>{longAnalysis}</Paragraph>
             </div>
 
-            {/* 底部区域 */}
             <div
                 style={{
                     display: 'flex',
@@ -70,30 +103,42 @@ const StyleAnalysisModal = ({ visible, onClose, script }) => {
                     boxSizing: 'border-box',
                 }}
             >
-                {/* 左侧的下载按钮 */}
                 <Button
                     type="link"
-                    icon={<DownloadOutlined/>}
-                    style={{marginLeft: '0', padding: '0'}}
+                    icon={<DownloadOutlined />}
+                    style={{ marginLeft: '0', padding: '0' }}
+                    onClick={showDownloadModal}
                 >
                     Download
                 </Button>
 
-                {/* 右侧的关闭和更多按钮 */}
                 <div>
-                    <Button type="default"
-                            onClick={onClose}
-                            style={{marginRight: '8px',
-                                backgroundColor: 'red',
-                                color: 'white',
-                                border: 'none'
-                            }}
+                    <Button
+                        type="default"
+                        onClick={onClose}
+                        style={{
+                            marginRight: '8px',
+                            backgroundColor: 'red',
+                            color: 'white',
+                            border: 'none'
+                        }}
                     >
                         Close
                     </Button>
-                    <Button type="primary">More</Button>
+                    <Button
+                        type="primary"
+                        onClick={handleMoreClick}
+                    >
+                        More
+                    </Button>
                 </div>
             </div>
+
+            <DownloadModal
+                visible={isDownloadModalVisible}
+                onClose={closeDownloadModal}
+                scriptId={scriptId}
+            />
         </Modal>
     );
 };
