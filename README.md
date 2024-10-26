@@ -89,5 +89,3 @@ Production version:
 - Generate production version: `npm run build`.
 
 - Preview: `npm run preview`.
-
-
