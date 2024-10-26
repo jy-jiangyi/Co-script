@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Menu, Layout, Breadcrumb, theme, Tabs, Button } from "antd";
+import { Menu, Layout, Breadcrumb, theme, Tabs, Button, Modal, Form, Input, Select, message } from "antd";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
 import styled from "styled-components";
@@ -26,6 +26,14 @@ const ScriptDemo1 = () => {
   const [redirect, setRedirect] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editorContent, setEditorContent] = useState(""); // For storing editor content
+
+  // For adding/editing scene
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newSceneTitle, setNewSceneTitle] = useState("");
+  
+  // For deleting a scene
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [sceneToDelete, setSceneToDelete] = useState(null); // For deleting a scene
 
   const location = useLocation();
 
@@ -128,7 +136,6 @@ const ScriptDemo1 = () => {
   const saveSceneContent = async () => {
     if (selectedScene) {
       try {
-        // Directly send editorContent, ensure it's a string
         await axios.put(
           `/api/script_scenes/update_content/${selectedScene.id}`,
           editorContent,
@@ -144,6 +151,51 @@ const ScriptDemo1 = () => {
         console.error("Error saving scene content:", error);
       }
     }
+  };
+
+  // Add or edit a scene
+  const handleSceneChange = async () => {
+    if (selectedScene) {
+      // Edit existing scene
+      try {
+        const response = await axios.put(`/api/script_scenes/${selectedScene.id}`, { title: newSceneTitle });
+        setScenes((prevScenes) => prevScenes.map(scene => scene.id === response.data.id ? response.data : scene));
+      } catch (error) {
+        console.error("Error updating scene:", error);
+      }
+    } else {
+      // Add new scene
+      try {
+        const response = await axios.post(`/api/scripts/${scriptName.id}/scenes`, { title: newSceneTitle });
+        setScenes([...scenes, response.data]);
+      } catch (error) {
+        console.error("Error adding scene:", error);
+      }
+    }
+    setIsModalVisible(false);
+    setNewSceneTitle("");
+  };
+
+  // Delete a scene with confirmation
+  const confirmDeleteScene = async () => {
+    if (sceneToDelete) {
+      try {
+        await axios.delete(`/api/script_scenes/${sceneToDelete}`);
+        setScenes(scenes.filter((scene) => scene.id !== sceneToDelete));
+        setSceneToDelete(null);
+        setIsDeleteModalVisible(false);
+        message.success("Scene deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting scene:", error);
+      }
+    }
+  };
+
+  // Show modal for adding/editing a scene
+  const showModal = (scene) => {
+    setSelectedScene(scene);
+    setNewSceneTitle(scene ? scene.title : ""); // Set title if editing, blank if adding
+    setIsModalVisible(true); // Show modal
   };
 
   return (
@@ -170,16 +222,28 @@ const ScriptDemo1 = () => {
               style={{ height: "100%", borderRight: 0 }}
             >
               {scenes.map((scene) => (
-                <Menu.Item
-                  key={scene.id}
-                  onClick={() => {
+                <Menu.Item key={scene.id}>
+                  <span onClick={() => {
                     setSelectedScene(scene);
                     setEditorContent(scene.content); // Set editor content
-                  }}
-                >
-                  Scene {scene.scene}: {scene.title}
+                  }}>
+                    Scene {scene.scene}: {scene.title}
+                  </span>
+                  <Button 
+                    type="link" 
+                    onClick={() => showModal(scene)} 
+                    style={{ marginLeft: 8 }}
+                  >
+                    Edit
+                  </Button>
                 </Menu.Item>
               ))}
+              <Menu.Item key="add-scene" onClick={() => showModal(null)}>
+                Add Scene
+              </Menu.Item>
+              <Menu.Item key="delete-scene" onClick={() => setIsDeleteModalVisible(true)}>
+                Delete Scene
+              </Menu.Item>
             </Menu>
           </Sider>
 
@@ -226,6 +290,52 @@ const ScriptDemo1 = () => {
             )}
           </Content>
         </Layout>
+
+        {/* Modal for adding/editing scene */}
+        <Modal
+          title={selectedScene ? "Edit Scene" : "Add New Scene"}
+          visible={isModalVisible}
+          onOk={handleSceneChange}
+          onCancel={() => setIsModalVisible(false)}
+        >
+          <Form>
+            <Form.Item label="Scene Title">
+              <Input
+                value={newSceneTitle}
+                onChange={(e) => setNewSceneTitle(e.target.value)}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Modal for deleting a scene */}
+        <Modal
+          title="Delete Scene"
+          visible={isDeleteModalVisible}
+          onCancel={() => setIsDeleteModalVisible(false)}
+          footer={null}
+        >
+          <Form>
+            <Form.Item label="Select Scene to Delete">
+              <Select
+                placeholder="Select Scene"
+                onChange={setSceneToDelete}
+                style={{ width: "100%" }}
+              >
+                {scenes.map(scene => (
+                  <Select.Option key={scene.id} value={scene.id}>
+                    Scene {scene.scene}: {scene.title}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" onClick={confirmDeleteScene}>
+                Confirm Delete
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
       </Content>
     </Layout>
   );
