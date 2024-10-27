@@ -165,30 +165,31 @@ function SceneIllustrationGenerationPage() {
     }, [scriptId]);
 
     // Handler for generating all scenes images
-    const handleGenerateScenes = () => {
+    const handleGenerateScenes = async () => {
         setLoading(true);
-        axios
-            .get(`${API_ENDPOINT}/generate_script_images`, {
-                params: {
-                    scriptId: scriptId,
-                },
-            })
-            .then((response) => {
-                const imageUrls = response.data;
+        try {
+            for (let i = 0; i < scenes.length; i++) {
+                const scene = scenes[i];
+                const response = await axios.get(`${API_ENDPOINT}/generate_scene_image`, {
+                    params: {
+                        sceneId: scene.id,
+                    },
+                });
+                const newImageUrl = response.data;
+                // Update the scene's imageUrl in the state
                 setScenes((prevScenes) =>
-                    prevScenes.map((scene, index) => ({
-                        ...scene,
-                        imageUrl: imageUrls[index] || scene.imageUrl,
-                    }))
+                    prevScenes.map((s) =>
+                        s.id === scene.id ? { ...s, imageUrl: newImageUrl } : s
+                    )
                 );
-            })
-            .catch((error) => {
-                console.error('Error generating images:', error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            }
+        } catch (error) {
+            console.error('Error generating images:', error);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     // Handler for updating a single scene's imageUrl
     const handleUpdateSceneImage = (sceneId, newImageUrl) => {
