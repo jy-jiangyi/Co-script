@@ -24,6 +24,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { marked } from "marked";
+import { TwitterOutlined } from '@ant-design/icons'; 
 
 
 const { Content, Sider } = Layout;
@@ -68,40 +69,75 @@ const ScriptDemo1 = () => {
     }
   `;
 
+  const shareProgressToTwitter = async () => {
+    // 创建拼接内容的变量
+    const tweetContent = `Our current script ${scriptName}'s summary progress is ${shortSummary} Please follow us to get more news about this script!`;
+    
+    // 对内容进行 URL 编码
+    const encodedContent = encodeURIComponent(tweetContent);
+
+    try {
+        const response = await fetch(`/tweet?content=${encodedContent}`, {
+            method: 'GET', // 使用 GET 请求
+        });
+
+        const data = await response.text(); // 解析文本响应
+
+        // 检查返回结果
+        if (data === "Done") {
+            window.alert("Progress is shared successfully!"); // 弹出窗口
+        } else {
+            window.alert("Failed to share progress."); // 其他情况
+        }
+    } catch (error) {
+        console.error("Error sharing progress:", error);
+        window.alert("An error occurred while sharing progress."); // 错误处理
+    }
+};
+
   const NavigationBar = () => {
+
     const tabItems = [
-      { key: "character", label: "Character" },
-      { key: "parenthetical", label: "Parenthetical" },
-      { key: "dialogue", label: "Dialogue" },
-      { key: "transition", label: "Transition" },
-      { key: "general", label: "General" },
-      { key: "action", label: "Action" },
-      {
-        key: "editing",
-        label: (
-          <Button type="primary" onClick={toggleEditing}>
-            {editing ? "Save" : "Edit"}
-          </Button>
-        ),
-      },
-      {
-        key: "scene-illustration",
-        label: <Link to="/scene_illustration">Scene Illustration</Link>,
-      },
-      {
-        key: "AI-continuation",
-        label: (
-          <Button type="primary" onClick={showAIContinuationModal}>
-            AI Continuation
-          </Button>
-        ),
-      },
+        // { key: "character", label: "Character" },
+        // { key: "parenthetical", label: "Parenthetical" },
+        // { key: "dialogue", label: "Dialogue" },
+        // { key: "transition", label: "Transition" },
+        // { key: "general", label: "General" },
+        // { key: "action", label: "Action" },
+        {
+            key: "editing",
+            label: (
+                <Button type="primary" onClick={toggleEditing}>
+                    {editing ? "Save" : "Edit"}
+                </Button>
+            ),
+        },
+        {
+            key: "scene-illustration",
+            label: <Link to="/scene_illustration">Scene Illustration</Link>,
+        },
+        {
+            key: "AI-continuation",
+            label: (
+                <Button type="primary" onClick={showAIContinuationModal}>
+                    AI Continuation
+                </Button>
+            ),
+        },
+        {
+            key: "share-twitter",
+            label: (
+                <Button type="default" onClick={shareProgressToTwitter} icon={<TwitterOutlined />}>
+                    Share Progress to Twitter
+                </Button>
+            ),
+        },
     ];
 
     return (
-      <StyledTabs defaultActiveKey="character" centered items={tabItems} />
+        <StyledTabs defaultActiveKey="character" centered items={tabItems} />
     );
-  };
+};
 
   const fetchScriptAndScenes = async () => {
     const params = new URLSearchParams(location.search);
