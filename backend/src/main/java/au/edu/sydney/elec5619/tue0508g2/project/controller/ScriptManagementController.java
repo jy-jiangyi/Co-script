@@ -39,35 +39,33 @@ public class ScriptManagementController {
         this.aiGemini = aiGemini;
     }
 
-    // 获取短摘要的API
+    // short summary
     @GetMapping("/{scriptId}/scenes/summary/short")
     public Mono<ResponseEntity<String>> getScriptScenesSummaryShort(@PathVariable Long scriptId) {
         return scriptManagement.getScriptScenesContentAsString(scriptId)
                 .flatMap(this::summaryShort)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    // 在出现错误时返回500状态码
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Error: " + e.getMessage()));
                 });
     }
 
+    //long summary
     @GetMapping("/scripts/{scriptId}/scenes/summary/long")
     public Mono<ResponseEntity<String>> getScriptScenesSummaryLong(@PathVariable Long scriptId) {
 //        test
 //        scriptId=1L;
-        return scriptManagement.getScriptScenesContentAsString(scriptId) // 将 scriptId 传递给方法
-                .flatMap(this::summaryLong) // 调用 summaryLong 方法生成长摘要
+        return scriptManagement.getScriptScenesContentAsString(scriptId)
+                .flatMap(this::summaryLong)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    // 在出现错误时返回500状态码
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Error: " + e.getMessage()));
                 });
     }
 
 
-    // 内部短摘要方法
     private Mono<String> summaryShort(String text) {
         String prompt = "Please summarize the provided text to less than 20 words: " + text;
 
@@ -77,7 +75,6 @@ public class ScriptManagementController {
         return aiGemini.textGeneration(requestBody);
     }
 
-    // 内部长摘要方法
     private Mono<String> summaryLong(String text) {
         String prompt = "Please summarize the provided text to less than 500 words: " + text;
 
@@ -86,30 +83,6 @@ public class ScriptManagementController {
 
         return aiGemini.textGeneration(requestBody);
     }
-
-    //search scripts
-//    @PostMapping("/findSimilarFullScripts")
-//    public Mono<ResponseEntity<List<Script>>> findSimilarFullScripts(HttpServletRequest request, @RequestBody String text) {
-//        HttpSession session = request.getSession();
-//        Long userId = (Long) session.getAttribute("userId");
-//
-//        return scriptManagement.findSimilarScriptsByUser(userId, text)
-//                .flatMap(scriptList -> {
-//                    if (scriptList.isEmpty()) {
-//                        // 如果没有匹配的 script，返回204状态码
-//                        return Mono.just(ResponseEntity.noContent().build());
-//                    } else {
-//                        // 返回匹配的 script 对象列表，状态码为200
-//                        return Mono.just(ResponseEntity.ok(scriptList));
-//                    }
-//                })
-//                .onErrorResume(e -> {
-//                    // 处理错误，返回500状态码
-//                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                            .body(null));
-//                });
-//    }
-
 
     // get scripts by user id
     @PostMapping("/findAllScripts")
@@ -120,7 +93,7 @@ public class ScriptManagementController {
 //        userId=1L;
 
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 未登录的情况
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<ScriptSummaryDTO> scripts = scriptManagement.findAllScriptsByUserId(userId);
@@ -131,28 +104,23 @@ public class ScriptManagementController {
     public ResponseEntity<List<Long>> searchScript(@RequestBody Map<String, String> request, HttpSession session) {
         String text = request.get("text");
 
-        // 获取用户ID
         Long userId = (Long) session.getAttribute("userId");
 
         if (userId == null) {
             return ResponseEntity.status(401).body(null);
         }
 
-        // 输出收到的搜索文本和用户ID
         System.out.println("Received search text: " + text);
         System.out.println("User ID: " + userId);
 
-        // 查询符合条件的 script
         List<Script> scripts = scriptRepository.findByCreatorAndNameContaining(userId, text);
 
-        // 提取符合条件的 script 的 ID
         List<Long> scriptIds = scripts.stream()
                 .map(Script::getId)
                 .collect(Collectors.toList());
 
         System.out.println("Found script IDs: " + scriptIds);
 
-        // 返回符合条件的 script ID 列表
         return ResponseEntity.ok(scriptIds);
     }
 

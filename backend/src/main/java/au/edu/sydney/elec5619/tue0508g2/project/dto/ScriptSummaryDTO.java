@@ -8,7 +8,6 @@ public class ScriptSummaryDTO {
     private String name;
     private String summary;
 
-    // 正确的构造函数
     public ScriptSummaryDTO(Long id, String name, String summary) {
         this.id = id;
         this.name = name;

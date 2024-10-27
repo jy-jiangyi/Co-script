@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { Modal, Button, Typography, message } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import DownloadModal from "./DownloadModal.jsx";
+import {ScriptContext} from "../hooks/ScriptContext.jsx";
 
 const { Title, Paragraph } = Typography;
 
@@ -12,18 +13,15 @@ const StyleAnalysisModal = ({ visible, onClose, scriptTitle, scriptAnalysis, lon
     const longAnalysis = longSummary || 'No long summary available.';
     const navigate = useNavigate();
     const [isDownloadModalVisible, setDownloadModalVisible] = useState(false);
+    const { setScriptId } = useContext(ScriptContext);
 
-    // 打印 scriptId 以确认是否正确传递
     useEffect(() => {
         console.log('Received scriptId:', scriptId);
     }, [scriptId]);
 
     const handleMoreClick = () => {
-        if (scriptId) {
-            navigate('/script_editing', { state: { scriptId } });
-        } else {
-            message.error('未找到有效的 scriptId');
-        }
+        setScriptId(scriptId);
+        navigate('/script_editing');
     };
 
     const showDownloadModal = () => {
