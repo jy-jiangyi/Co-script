@@ -22,8 +22,12 @@ public class ContextController {
     @Autowired
     private ContextRepository contextRepository;
 
+    @Autowired
+    private Utils utils;
+
     @GetMapping(path="/all")
-    public @ResponseBody Iterable<Context> getAllContext() {
+    public @ResponseBody Iterable<Context> getAllContext(HttpServletRequest request) {
+        Long userId = utils.getLoginUser(request);
         return contextRepository.findAll();
     }
 
