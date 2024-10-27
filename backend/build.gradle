@@ -37,6 +37,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+	implementation 'org.apache.pdfbox:pdfbox:2.0.29'
 }
 
 tasks.named('test') {
