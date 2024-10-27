@@ -7,6 +7,7 @@ import UploadFailModal from '../components/UploadFailModal';
 import DownloadFailModal from '../components/DownloadFailModal';
 import DownloadSuccessModal from '../components/DownloadSuccessModal';
 import DownloadModal from '../components/DownloadModal';
+import LoadingModal from '../components/LoadingModal'; // 引入 LoadingModal 组件
 import axios from 'axios';
 
 const { Content } = Layout;
@@ -17,6 +18,8 @@ const ScriptManagementPage = () => {
     const [filteredScripts, setFilteredScripts] = useState([]);
     const [fileContent, setFileContent] = useState('');
     const [newFileName, setNewFileName] = useState('');
+    const [loading, setLoading] = useState(true); // 用于控制页面的加载状态
+
     const navigate = useNavigate();
     const [searchResults, setSearchResults] = useState([]);
 
@@ -30,6 +33,7 @@ const ScriptManagementPage = () => {
     // Fetch scripts from the backend
     useEffect(() => {
         const fetchScripts = async () => {
+            setLoading(true); // 显示 LoadingModal
             try {
                 const response = await axios.post('/api/script_management/findAllScripts');
                 setScripts(response.data);
@@ -37,7 +41,9 @@ const ScriptManagementPage = () => {
                 console.log(response.data);
             } catch (error) {
                 console.error('Error fetching scripts:', error);
-                message.error('Failed get scripts:', error);
+                message.error('Failed to get scripts');
+            } finally {
+                setLoading(false); // 取消 LoadingModal
             }
         };
 
@@ -46,6 +52,7 @@ const ScriptManagementPage = () => {
 
     // Handle search
     const handleSearch = async (text) => {
+        setLoading(true); // 显示 LoadingModal
         try {
             const response = await axios.post('/api/script_management/search', { text });
 
@@ -61,8 +68,10 @@ const ScriptManagementPage = () => {
                 message.error('Search Failed');
             }
         } catch (error) {
-            console.error('Search Failed：', error);
+            console.error('Search Failed:', error);
             message.error('Search Failed');
+        } finally {
+            setLoading(false); // 取消 LoadingModal
         }
     };
 
@@ -70,7 +79,7 @@ const ScriptManagementPage = () => {
     const beforeUpload = (file) => {
         const isTxt = file.type === 'text/plain';
         if (!isTxt) {
-            message.error('Only .txt allowed！');
+            message.error('Only .txt allowed!');
             return Upload.LIST_IGNORE;
         }
         return true;
@@ -97,7 +106,7 @@ const ScriptManagementPage = () => {
     // Handle rename and save
     const handleRenameAndSave = async () => {
         if (!newFileName) {
-            message.error('please rename the file！');
+            message.error('Please rename the file!');
             return;
         }
 
@@ -106,10 +115,10 @@ const ScriptManagementPage = () => {
                 fileName: newFileName,
                 content: fileContent,
             });
-            message.success('send success！');
+            message.success('File saved successfully!');
             setUploadSuccessVisible(false);
         } catch (error) {
-            message.error('send fail！');
+            message.error('File saving failed!');
             console.error(error);
         }
     };
@@ -188,6 +197,9 @@ const ScriptManagementPage = () => {
                     ))}
                 </Row>
 
+                {/* Loading Modal */}
+                <LoadingModal visible={loading} />
+
                 {/* Upload success modal */}
                 <Modal
                     visible={isUploadSuccessVisible}
@@ -210,7 +222,7 @@ const ScriptManagementPage = () => {
                     />
                 </Modal>
 
-                {/* Modals for testing */}
+                {/* Other modals */}
                 <UploadFailModal visible={isUploadFailVisible} onClose={() => setUploadFailVisible(false)} />
                 <DownloadFailModal visible={isDownloadFailVisible} onClose={() => setDownloadFailVisible(false)} />
                 <DownloadSuccessModal visible={isDownloadSuccessVisible} onClose={() => setDownloadSuccessVisible(false)} />
