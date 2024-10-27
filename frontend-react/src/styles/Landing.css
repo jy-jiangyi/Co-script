@@ -1,0 +1,70 @@
+/* 容器样式 */
+.landing-container {
+    background: linear-gradient(
+            to bottom,
+            #001529 0%,
+            black 70%,
+            #f5f5f5 100%
+    );
+    padding: 50px 0;
+    min-height: calc(100vh - 64px - 70px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* 彩虹文字样式，具有持续变化的颜色 */
+.rainbow-text {
+    background: linear-gradient(
+            270deg,
+            red,
+            orange,
+            yellow,
+            green,
+            blue,
+            indigo,
+            violet,
+            red
+    );
+    background-size: 1500% 1500%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow-animation 10s linear infinite;
+    text-align: center;
+    font-size: 64px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* 简介文字样式 */
+.intro-text {
+    color: white; /* 白色文字 */
+    text-align: center;
+    font-size: 24px;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    animation-delay: 1s;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* 彩虹渐变动画 */
+@keyframes rainbow-animation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

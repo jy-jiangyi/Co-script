@@ -19,7 +19,7 @@ const WelcomeNavBar = () => {
         {
             key: "2",
             label: (
-                <Link to="/home">Script Lib</Link>
+                <Link to="/script_management">Script Lib</Link>
             )
         },{
             key: "3",
