@@ -52,4 +52,11 @@ public class MvcTools {
         assertEquals("test1", response);
     }
 
+    public String logout(RestTemplate restTemplate){
+        String response = restTemplate.getForObject(
+                path("/users/logout"), String.class
+        );
+        return response;
+    }
+
 }

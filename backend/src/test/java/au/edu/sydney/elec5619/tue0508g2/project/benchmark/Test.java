@@ -7,12 +7,13 @@ import java.util.concurrent.TimeUnit;
 
 public class Test {
 
+    /*
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @Warmup(iterations =1)
     @Measurement(iterations = 1)
     @Fork(value = 1)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)*/
     public void testMethod(Blackhole blackhole) {
         int result = 0;
         for (int i = 0; i < 100000; i++) {
