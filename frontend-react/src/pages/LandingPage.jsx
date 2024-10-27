@@ -11,7 +11,7 @@ const LandingPage = () => {
                 Co-Script
             </Title>
             <Paragraph className="intro-text">
-                Collaborate intelligently on scripts with AI assistance.
+                Collaborate Intelligently. Create Remarkably.
             </Paragraph>
         </div>
     );
