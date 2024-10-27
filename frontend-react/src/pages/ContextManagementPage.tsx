@@ -8,6 +8,7 @@ const { Header, Content, Footer, Sider } = Layout;
 
 const ContextManagementPage = () => {
 
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
@@ -28,6 +29,7 @@ const ContextManagementPage = () => {
                     <ContextArea />
                 </Content>
             </Layout>
+            
         </Content>
         </ActiveCtxProvider>
     );
