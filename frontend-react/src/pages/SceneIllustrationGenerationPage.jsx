@@ -44,10 +44,10 @@ function Header({ scriptName, onGenerateScenes, loading }) {
 
 
 function SceneItem({ scene, onUpdateScene }) {
-    const [loading, setLoading] = useState(false);
-
     const handleRegenerate = () => {
-        setLoading(true);
+        // Set loading to true for this scene
+        onUpdateScene(scene.id, null, true);
+
         axios
             .get(`${API_ENDPOINT}/generate_scene_image`, {
                 params: {
@@ -56,13 +56,13 @@ function SceneItem({ scene, onUpdateScene }) {
             })
             .then((response) => {
                 const newImageUrl = response.data;
-                onUpdateScene(scene.id, newImageUrl);
+                // Update the scene's imageUrl and set loading to false
+                onUpdateScene(scene.id, newImageUrl, false);
             })
             .catch((error) => {
                 console.error('Error regenerating image:', error);
-            })
-            .finally(() => {
-                setLoading(false);
+                // Set loading to false in case of error
+                onUpdateScene(scene.id, null, false);
             });
     };
 
@@ -108,7 +108,7 @@ function SceneItem({ scene, onUpdateScene }) {
                                 shape="round"
                                 icon={<ReloadOutlined />}
                                 onClick={handleRegenerate}
-                                loading={loading}
+                                loading={scene.loading}
                             >
                                 Regenerate
                             </Button>
@@ -152,12 +152,18 @@ function SceneIllustrationGenerationPage() {
             .then((response) => {
                 const data = response.data;
                 setScriptName(data.scriptName);
-                setScenes(data.scenes);
+                // Initialize loading to false for each scene
+                const scenesWithLoading = data.scenes.map((scene) => ({
+                    ...scene,
+                    loading: false,
+                }));
+                setScenes(scenesWithLoading);
             })
             .catch((error) => {
                 console.error('Error fetching script data:', error);
             });
     };
+
 
 
     useEffect(() => {
@@ -170,21 +176,24 @@ function SceneIllustrationGenerationPage() {
         try {
             for (let i = 0; i < scenes.length; i++) {
                 const scene = scenes[i];
+                // Set loading to true for this scene
+                handleUpdateSceneImage(scene.id, null, true);
+
                 const response = await axios.get(`${API_ENDPOINT}/generate_scene_image`, {
                     params: {
                         sceneId: scene.id,
                     },
                 });
                 const newImageUrl = response.data;
-                // Update the scene's imageUrl in the state
-                setScenes((prevScenes) =>
-                    prevScenes.map((s) =>
-                        s.id === scene.id ? { ...s, imageUrl: newImageUrl } : s
-                    )
-                );
+                // Update the scene's imageUrl and set loading to false
+                handleUpdateSceneImage(scene.id, newImageUrl, false);
             }
         } catch (error) {
             console.error('Error generating images:', error);
+            // In case of error, set loading to false for all scenes
+            setScenes((prevScenes) =>
+                prevScenes.map((scene) => ({ ...scene, loading: false }))
+            );
         } finally {
             setLoading(false);
         }
@@ -192,13 +201,16 @@ function SceneIllustrationGenerationPage() {
 
 
     // Handler for updating a single scene's imageUrl
-    const handleUpdateSceneImage = (sceneId, newImageUrl) => {
+    const handleUpdateSceneImage = (sceneId, newImageUrl = null, loading = false) => {
         setScenes((prevScenes) =>
             prevScenes.map((scene) =>
-                scene.id === sceneId ? { ...scene, imageUrl: newImageUrl } : scene
+                scene.id === sceneId
+                    ? { ...scene, imageUrl: newImageUrl || scene.imageUrl, loading: loading }
+                    : scene
             )
         );
     };
+
 
 
     return (
