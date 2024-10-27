@@ -37,3 +37,4 @@ out/
 ### VS Code ###
 .vscode/
 frontend-react/frontend-react.code-workspace
+backend/src/main/resources/application-secret.properties

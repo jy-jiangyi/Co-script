@@ -2,6 +2,8 @@ package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,11 @@ import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.client5.http.cookie.CookieStore;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,40 +37,34 @@ public class ContextMvcTests {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private MvcTools mvcTools;
+
     private static final Logger logger = LoggerFactory.getLogger(ContextMvcTests.class);
 
-    private String path(String uri){
-        return "http://localhost:" + port + uri;
-    }
+    private RestTemplate restTemplate;
 
-    private RestTemplate getRestTemplate(){
-        CookieStore cookieStore = new BasicCookieStore();
-
-        // 2. 创建 HttpClient，并配置 CookieStore
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultCookieStore(cookieStore)
-                .build();
-
-        // 3. 将 HttpClient 与 RestTemplate 结合
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        return new RestTemplate(factory);
+    @BeforeEach
+    public void env_init(){
+        mvcTools.setPort(port);
+        restTemplate = mvcTools.getRestTemplate();
     }
 
     @Test
-    public void contextCreateFetchUpdateDelete() {
-        RestTemplate restTemplate = getRestTemplate();
-        // login first
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode loginNode = objectMapper.createObjectNode();
-        loginNode.put("username", "admin");
-        assertEquals("{\"username\":\"admin\"}", loginNode.toString());
-        loginNode.removeAll();
-        loginNode.put("email", "test1@gmail.com");
-        loginNode.put("password_hash", "123");
-        String response = restTemplate.postForObject(path("/users/login"), loginNode, String.class);
-        assertEquals("test1", response);
-        response = restTemplate.getForObject(path("/users/name"), String.class);
-        assertEquals("test1", response);
+    public void contextCreateAndDelete() {
+        mvcTools.login(restTemplate);
+        String result = restTemplate.getForObject(mvcTools.path("/context/all"), String.class);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void contextNonLoginSafetyTest(){
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(mvcTools.path("/context/all"), String.class);
+            fail("Not pass context fetch only login");
+        }catch(HttpStatusCodeException e){
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), e.getStatusCode().value(), "Failed to check status code of unauthed");
+        }
     }
 
 }

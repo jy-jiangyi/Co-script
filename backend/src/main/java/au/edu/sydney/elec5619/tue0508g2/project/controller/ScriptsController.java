@@ -9,8 +9,10 @@ import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -199,10 +201,6 @@ public class ScriptsController {
                 });
     }
 
-
-
-
-
     // update 我的Script
 
     //return script content
@@ -229,4 +227,62 @@ public class ScriptsController {
         return ResponseEntity.ok(sceneDTOs); // 返回 200 OK 和 DTO 列表
     }
 
+    // generate
+    @PostMapping("/ai_continuation")
+    public Mono<ResponseEntity<String>> generateScript(
+            @RequestBody AIContinuationDTO requestBody,
+            HttpServletRequest request) {
+
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("userId");
+
+        // 检查用户是否已登录
+        if (userId == null) {
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("{\"message\": \"User not authorized.\"}"));
+        }
+
+        // 错误处理模块
+        return scriptGeneration.generateScriptByAIContinuation(
+                        requestBody.getScript_id(),
+                        requestBody.getScene_id(),
+                        requestBody.getName(),
+                        requestBody.getContextList(),
+                        requestBody.getPositive(),
+                        requestBody.getNegative())
+                .flatMap(generatedScript -> {
+                    // 查找脚本
+                    Script script = scriptRepository.findByScriptId(requestBody.getScript_id());
+                    if (script == null) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("{\"message\": \"Script not found.\"}"));
+                    }
+
+                    // 查找最后一个场景
+                    Integer lastScene = scriptScenesRepository.findMaxSceneByScriptId(requestBody.getScript_id());
+
+                    // 创建 ScriptScenes 实体并设置属性
+                    ScriptScenes scriptScenes = new ScriptScenes();
+                    scriptScenes.setScript(script);
+                    scriptScenes.setScene(lastScene != null ? lastScene + 1 : 1);
+                    scriptScenes.setTitle(requestBody.getName());
+                    scriptScenes.setContent(generatedScript);
+                    scriptScenes.setCreate_time(LocalDateTime.now());
+
+                    scriptScenesRepository.save(scriptScenes);
+
+                    // 保存 ScriptScenes 实体
+                    return (Mono.just(ResponseEntity.ok("{\"message\": \"A new scene is generated successfully!\"}")));
+                })
+                .onErrorResume(WebClientResponseException.BadRequest.class, e -> {
+                    // 处理 400 Bad Request 错误
+                    return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("{\"message\": \"Bad request: " + e.getResponseBodyAsString() + "\"}"));
+                })
+                .onErrorResume(e -> {
+                    // 处理其他错误
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("{\"message\": \"Error generating scene: " + e.getClass().getSimpleName() + " - " + e.getMessage() + "\"}"));
+                });
+    }
 }

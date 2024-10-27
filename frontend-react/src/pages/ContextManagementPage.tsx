@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Breadcrumb, Layout, Button, theme } from 'antd';
+import { Layout, Button, theme } from 'antd';
 import { ActiveCtxProvider } from "../hooks/ActiveContext";
 import ContextList from "../components/contextLeft";
 import ContextArea from "../components/ContextRight";
@@ -7,6 +7,7 @@ import ContextArea from "../components/ContextRight";
 const { Header, Content, Footer, Sider } = Layout;
 
 const ContextManagementPage = () => {
+
 
     const {
         token: { colorBgContainer, borderRadiusLG },
@@ -28,6 +29,7 @@ const ContextManagementPage = () => {
                     <ContextArea />
                 </Content>
             </Layout>
+            
         </Content>
         </ActiveCtxProvider>
     );

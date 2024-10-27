@@ -4,6 +4,10 @@
 
 ## 1 Functionalities
 
+The achieved functionalities include: Authentication services, Script Management, File import and export, Script browsing, Online Script Editing, Script Translation, Script Generation, Script style analysis, Script emulation, Script continuation, Script rewriting, Scene illustration generation and context management. Most of the core functions are related to AI.
+
+For detailed information of functionalities, please refer to our [Wiki](https://github.sydney.edu.au/2024ELEC5619/Tue-05-08-Lab-Group-2/wiki#1-functionalities) page.
+
 ## 2 Backend
 
 The backend is build with spring boot framework version 3.3.3 with gradle v8.8 with Java (JDK 22).
