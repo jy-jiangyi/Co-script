@@ -40,6 +40,7 @@ const ScriptDemo1 = () => {
   const [redirect, setRedirect] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editorContent, setEditorContent] = useState("");
+  const [shortSummary, setShortSummary] = useState(""); // 新增状态
   
   const [scriptId, setScriptId] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -127,6 +128,19 @@ const ScriptDemo1 = () => {
   useEffect(() => {
     fetchScriptAndScenes();
   }, [sideToggle])
+
+  useEffect(() => {
+    const fetchScriptSummary = async () => {
+      try {
+        const response = await axios.get(`/api/script_management/${scriptId}/scenes/summary/short`);
+        setShortSummary(response.data);
+      } catch (error) {
+        console.error("Error fetching script summary:", error);
+      }
+    };
+
+    fetchScriptSummary();
+  }, [scriptId]); // 依赖项是 scriptId
 
   const handleRedirect = () => {
     setRedirect(true);
@@ -283,7 +297,7 @@ const ScriptDemo1 = () => {
         </Breadcrumb>
         <div>
           <h2>{scriptName}</h2>
-          <p>Script short summary</p>
+          <p>{shortSummary}</p>
         </div>
         <Layout>
           <Sider width={200} style={{ background: colorBgContainer }}>
