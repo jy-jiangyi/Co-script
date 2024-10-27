@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import {
   Menu,
@@ -24,7 +24,8 @@ import "highlight.js/styles/atom-one-dark.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { marked } from "marked";
-import { TwitterOutlined } from '@ant-design/icons'; 
+import { TwitterOutlined } from '@ant-design/icons';
+import {ScriptContext} from "../hooks/ScriptContext.jsx";
 
 
 const { Content, Sider } = Layout;
@@ -43,7 +44,8 @@ const ScriptDemo1 = () => {
   const [editorContent, setEditorContent] = useState("");
   const [shortSummary, setShortSummary] = useState(""); // 新增状态
   
-  const [scriptId, setScriptId] = useState(null);
+  // const [scriptId, setScriptId] = useState(null);
+  const { scriptId, setScriptId } = useContext(ScriptContext);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newSceneTitle, setNewSceneTitle] = useState("");
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -140,16 +142,17 @@ const ScriptDemo1 = () => {
 };
 
   const fetchScriptAndScenes = async () => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
+    // const params = new URLSearchParams(location.search);
+    // const id = params.get("id");
+    // const { scriptId } = useContext(ScriptContext);
 
-    if (id) {
-      setScriptId(id);
+    if (scriptId) {
+      setScriptId(scriptId);
       try {
-        const scriptResponse = await axios.get(`/scripts/${id}`);
+        const scriptResponse = await axios.get(`/scripts/${scriptId}`);
         setScriptName(scriptResponse.data);
 
-        const scenesResponse = await axios.get(`/scripts/${id}/scenes`);
+        const scenesResponse = await axios.get(`/scripts/${scriptId}/scenes`);
         setScenes(scenesResponse.data);
         return scenesResponse.data;
       } catch (error) {
