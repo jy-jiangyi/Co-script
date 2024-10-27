@@ -8,4 +8,7 @@ public interface ScriptRepository extends CrudRepository<Script, Long> {
 
     @Query(value = "SELECT name FROM scripts WHERE id = :id", nativeQuery = true)
     String getScriptNameById(@Param("id") Long id);
+
+    @Query("SELECT s FROM Script s WHERE s.id = :scriptId")
+    Script findByScriptId(@Param("scriptId") Long scriptId);
 }
