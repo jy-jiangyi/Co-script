@@ -1,6 +1,5 @@
 package au.edu.sydney.elec5619.tue0508g2.project.controller;
 
-import au.edu.sydney.elec5619.tue0508g2.project.dto.GenerateRequestDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.dto.ScriptSummaryDTO;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptRepository;
 import au.edu.sydney.elec5619.tue0508g2.project.repository.ScriptScenesRepository;
@@ -17,14 +16,12 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ScriptManagementTests {
+public class ScriptManagementTest {
 
     @Autowired
     private ScriptRepository scriptRepository;
@@ -45,14 +42,6 @@ public class ScriptManagementTests {
     public void test_getScriptScenesSummaryShort() {
         // 模拟请求体
         Long requestBody = 125L;
-
-        // 使用 Mockito 模拟 HttpServletRequest 和 HttpSession
-//        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-//        HttpSession session = Mockito.mock(HttpSession.class);
-//
-//        // 模拟 session 中的 userId
-//        Mockito.when(request.getSession()).thenReturn(session);
-//        Mockito.when(session.getAttribute("userId")).thenReturn(3L);
 
         // 调用控制器方法并传递模拟的 HttpServletRequest
         Mono<ResponseEntity<String>> result = scriptManagementController.getScriptScenesSummaryShort(requestBody);
@@ -115,11 +104,6 @@ public class ScriptManagementTests {
 
         // 断言状态码为 401 Unauthorized
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode(), "状态码应为 401 Unauthorized");
-    }
-
-    @Test
-    public void test_searchScript() {
-
     }
 
 }
