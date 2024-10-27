@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Menu, Layout, Breadcrumb, theme, Tabs, Button, Modal, Form, Input, Select, message } from "antd";
+import {
+  Menu,
+  Layout,
+  Breadcrumb,
+  theme,
+  Tabs,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+} from "antd";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
 import styled from "styled-components";
@@ -9,9 +21,10 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
-import ReactQuill from "react-quill"; // Import ReactQuill
-import "react-quill/dist/quill.snow.css"; // Import styles
-import { marked } from "marked"; // Import marked for Markdown conversion
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { marked } from "marked";
+
 
 const { Content, Sider } = Layout;
 
@@ -22,36 +35,33 @@ const ScriptDemo1 = () => {
 
   const [scriptName, setScriptName] = useState(null);
   const [scenes, setScenes] = useState([]);
+  const [sideToggle, setSideToggle] = useState(false);
   const [selectedScene, setSelectedScene] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editorContent, setEditorContent] = useState(""); // For storing editor content
-
-  // For adding/editing scene
+  const [editorContent, setEditorContent] = useState("");
+  
+  const [scriptId, setScriptId] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newSceneTitle, setNewSceneTitle] = useState("");
-
-  // For deleting a scene
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [sceneToDelete, setSceneToDelete] = useState(null); // For deleting a scene
-
+  const [sceneToDelete, setSceneToDelete] = useState(null);
+  const [selectedContext, setSelectedContext] = useState("");
+  const [sceneNameForAIContinuation, setSceneNameForAIContinuation] = useState("");
   const location = useLocation();
 
   const StyledTabs = styled(Tabs)`
     .ant-tabs-nav::before {
       border-bottom: none;
     }
-
     .ant-tabs-ink-bar {
       background-color: #1890ff;
       height: 2px;
     }
-
     .ant-tabs-tab {
       font-size: 11px;
       padding: 0px 0px;
     }
-
     .ant-tabs-tab-active .ant-tabs-tab-btn {
       color: #1890ff;
     }
@@ -92,26 +102,31 @@ const ScriptDemo1 = () => {
     );
   };
 
-  useEffect(() => {
-    const fetchScriptAndScenes = async () => {
-      const params = new URLSearchParams(location.search);
-      const scriptId = params.get("id");
+  const fetchScriptAndScenes = async () => {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
 
-      if (scriptId) {
-        try {
-          const scriptResponse = await axios.get(`/scripts/${scriptId}`);
-          setScriptName(scriptResponse.data);
+    if (id) {
+      setScriptId(id);
+      try {
+        const scriptResponse = await axios.get(`/scripts/${id}`);
+        setScriptName(scriptResponse.data);
 
-          const scenesResponse = await axios.get(`/scripts/${scriptId}/scenes`);
-          setScenes(scenesResponse.data);
-        } catch (error) {
-          console.error(error);
-        }
+        const scenesResponse = await axios.get(`/scripts/${id}/scenes`);
+        setScenes(scenesResponse.data);
+      } catch (error) {
+        console.error(error);
       }
-    };
+    }
+  }; 
 
+  useEffect(() => {
     fetchScriptAndScenes();
-  }, [location.search]);
+  }, []);
+
+  useEffect(() => {
+    fetchScriptAndScenes();
+  }, [sideToggle])
 
   const handleRedirect = () => {
     setRedirect(true);
@@ -121,25 +136,21 @@ const ScriptDemo1 = () => {
     return <Navigate to="/scene_illustration" />;
   }
 
-  // Toggle editing state
   const toggleEditing = () => {
     setEditing((prevEditing) => {
-      const newEditing = !prevEditing; // Toggle current state
+      const newEditing = !prevEditing;
       if (newEditing) {
-        // Enter edit mode
         if (selectedScene) {
           const htmlContent = marked(selectedScene.content);
-          setEditorContent(htmlContent); // Set editor content to Markdown
+          setEditorContent(htmlContent);
         }
       } else {
-        // Save content when exiting edit mode
         saveSceneContent();
       }
-      return newEditing; // Return new state
+      return newEditing;
     });
   };
 
-  // Save scene content
   const saveSceneContent = async () => {
     if (selectedScene) {
       try {
@@ -148,11 +159,10 @@ const ScriptDemo1 = () => {
           editorContent,
           {
             headers: {
-              "Content-Type": "text/plain", // Indicate pure text to backend
+              "Content-Type": "text/plain",
             },
           }
         );
-        // Optionally update selectedScene's content
         setSelectedScene((prev) => ({ ...prev, content: editorContent }));
       } catch (error) {
         console.error("Error saving scene content:", error);
@@ -160,20 +170,27 @@ const ScriptDemo1 = () => {
     }
   };
 
-  // Add or edit a scene
   const handleSceneChange = async () => {
     if (selectedScene) {
-      // Edit existing scene
       try {
-        const response = await axios.put(`/api/script_scenes/${selectedScene.id}`, { title: newSceneTitle });
-        setScenes((prevScenes) => prevScenes.map(scene => scene.id === response.data.id ? response.data : scene));
+        const response = await axios.put(
+          `/api/script_scenes/${selectedScene.id}`,
+          { title: newSceneTitle }
+        );
+        setScenes((prevScenes) =>
+          prevScenes.map((scene) =>
+            scene.id === response.data.id ? response.data : scene
+          )
+        );
       } catch (error) {
         console.error("Error updating scene:", error);
       }
     } else {
-      // Add new scene
       try {
-        const response = await axios.post(`/api/scripts/${scriptName.id}/scenes`, { title: newSceneTitle });
+        const response = await axios.post(
+          `/api/scripts/${scriptName.id}/scenes`,
+          { title: newSceneTitle }
+        );
         setScenes([...scenes, response.data]);
       } catch (error) {
         console.error("Error adding scene:", error);
@@ -183,7 +200,6 @@ const ScriptDemo1 = () => {
     setNewSceneTitle("");
   };
 
-  // Delete a scene with confirmation
   const confirmDeleteScene = async () => {
     if (sceneToDelete) {
       try {
@@ -198,15 +214,14 @@ const ScriptDemo1 = () => {
     }
   };
 
-  // Show modal for adding/editing a scene
   const showModal = (scene) => {
     setSelectedScene(scene);
-    setNewSceneTitle(scene ? scene.title : ""); // Set title if editing, blank if adding
-    setIsModalVisible(true); // Show modal
+    setNewSceneTitle(scene ? scene.title : "");
+    setIsModalVisible(true);
   };
 
-  // Show modal for AI continuation
-  const [isAIContinuationModalVisible, setIsAIContinuationModalVisible] = useState(false);
+  const [isAIContinuationModalVisible, setIsAIContinuationModalVisible] =
+    useState(false);
   const [selectedScene2, setSelectedScene2] = useState(null);
   const [positivePrompt, setPositivePrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
@@ -215,12 +230,39 @@ const ScriptDemo1 = () => {
     setIsAIContinuationModalVisible(true);
   };
 
-  const handleAIContinuationModalOk = () => {
-    // Handle AI continuation logic
-    console.log("Selected Scene:", selectedScene2);
-    console.log("Positive Prompt:", positivePrompt);
-    console.log("Negative Prompt:", negativePrompt);
-    setIsAIContinuationModalVisible(false);
+  const handleAIContinuationModalOk = async () => {
+    const requestBody = {
+      script_id: Number(scriptId),
+      scene_id: selectedScene2.scene,
+      name: sceneNameForAIContinuation,
+      contextList: [""],
+      positive: positivePrompt,
+      negative: negativePrompt,
+    };
+
+    console.log(requestBody);
+
+    try {
+      const response = await axios.post(
+        '/scripts/ai_continuation',
+        requestBody,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      message.success(response.data.message);
+      setIsAIContinuationModalVisible(false);
+      setSideToggle(!sideToggle);
+    } catch (error) {
+      if (error.response) {
+        message.error(`Error: ${error.response.data.message}`);
+      } else {
+        message.error("An unexpected error occurred.");
+      }
+    }
   };
 
   const handleAIContinuationModalCancel = () => {
@@ -252,10 +294,12 @@ const ScriptDemo1 = () => {
             >
               {scenes.map((scene) => (
                 <Menu.Item key={scene.id}>
-                  <span onClick={() => {
-                    setSelectedScene(scene);
-                    setEditorContent(scene.content); // Set editor content
-                  }}>
+                  <span
+                    onClick={() => {
+                      setSelectedScene(scene);
+                      setEditorContent(scene.content);
+                    }}
+                  >
                     Scene {scene.scene}: {scene.title}
                   </span>
                   <Button
@@ -267,12 +311,6 @@ const ScriptDemo1 = () => {
                   </Button>
                 </Menu.Item>
               ))}
-              <Menu.Item key="add-scene" onClick={() => showModal(null)}>
-                Add Scene
-              </Menu.Item>
-              <Menu.Item key="delete-scene" onClick={() => setIsDeleteModalVisible(true)}>
-                Delete Scene
-              </Menu.Item>
             </Menu>
           </Sider>
 
@@ -293,7 +331,7 @@ const ScriptDemo1 = () => {
                   <ReactQuill
                     value={editorContent}
                     onChange={setEditorContent}
-                    style={{ height: "300px" }} // Set height
+                    style={{ height: "300px" }}
                   />
                 ) : (
                   <ReactMarkdown
@@ -320,7 +358,6 @@ const ScriptDemo1 = () => {
           </Content>
         </Layout>
 
-        {/* Modal for adding/editing scene */}
         <Modal
           title={selectedScene ? "Edit Scene" : "Add New Scene"}
           visible={isModalVisible}
@@ -337,36 +374,6 @@ const ScriptDemo1 = () => {
           </Form>
         </Modal>
 
-        {/* Modal for deleting a scene */}
-        <Modal
-          title="Delete Scene"
-          visible={isDeleteModalVisible}
-          onCancel={() => setIsDeleteModalVisible(false)}
-          footer={null}
-        >
-          <Form>
-            <Form.Item label="Select Scene to Delete">
-              <Select
-                placeholder="Select Scene"
-                onChange={setSceneToDelete}
-                style={{ width: "100%" }}
-              >
-                {scenes.map(scene => (
-                  <Select.Option key={scene.id} value={scene.id}>
-                    Scene {scene.scene}: {scene.title}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" onClick={confirmDeleteScene}>
-                Confirm Delete
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        {/* Modal for AI Continuation */}
         <Modal
           title="AI Continuation"
           visible={isAIContinuationModalVisible}
@@ -374,10 +381,16 @@ const ScriptDemo1 = () => {
           onCancel={handleAIContinuationModalCancel}
         >
           <Form>
-            <Form.Item label="Select Scene">
+            <Form.Item label="Select Previous Scene">
               <Select
-                placeholder="Select Scene"
-                onChange={(value) => setSelectedScene2(value)}
+                placeholder="Select Previous Scene"
+                value={selectedScene2?.id}
+                onChange={(value) => {
+                  const selectedSceneItem = scenes.find(
+                    (scene) => scene.id === value
+                  );
+                  setSelectedScene2(selectedSceneItem);
+                }}
                 style={{ width: "100%" }}
               >
                 {scenes.map((scene) => (
@@ -386,6 +399,12 @@ const ScriptDemo1 = () => {
                   </Select.Option>
                 ))}
               </Select>
+            </Form.Item>
+            <Form.Item label="New Scene Name">
+              <Input
+                value={sceneNameForAIContinuation}
+                onChange={(e) => setSceneNameForAIContinuation(e.target.value)}
+              />
             </Form.Item>
             <Form.Item label="Positive Prompt">
               <Input
