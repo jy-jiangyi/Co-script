@@ -3,7 +3,10 @@ import au.edu.sydney.elec5619.tue0508g2.project.ai.AIGeminiImpl;
 import au.edu.sydney.elec5619.tue0508g2.project.ai.AIOpenAIImpl;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AITestRequestBody;
 import au.edu.sydney.elec5619.tue0508g2.project.entity.request.AIImageRequestBody;
+import au.edu.sydney.elec5619.tue0508g2.project.ext.X;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -14,6 +17,10 @@ public class Tools {
 
     private final AIGeminiImpl aiGemini;
     private final AIOpenAIImpl aiOpenAI;
+    private final X x;
+
+    @Autowired
+    private Utils utils;
 
     @GetMapping("/about")
     public String about(@RequestParam(value = "group") String group) {
@@ -23,6 +30,13 @@ public class Tools {
     @PostMapping("/ai_test")
     public Mono<String> ai_test(@RequestBody AITestRequestBody body) {
         return aiGemini.textGeneration(body);
+    }
+
+    @GetMapping("/tweet")
+    public String tweet_test(@RequestParam(value = "content") String content, HttpServletRequest request){
+        utils.getLoginUser(request);
+        x.tweet(content);
+        return "Done";
     }
 
 

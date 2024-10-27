@@ -28,7 +28,7 @@ public class ContextController {
     @GetMapping(path="/all")
     public @ResponseBody Iterable<Context> getAllContext(HttpServletRequest request) {
         Long userId = utils.getLoginUser(request);
-        return contextRepository.findAll();
+        return contextRepository.findByCreator(userId, PageRequest.of(0, 10000));
     }
 
     @PostMapping(path="/")
