@@ -63,12 +63,10 @@ public class ScriptManagement {
     public Mono<String> getScriptScenesContentAsString(Long scriptId) {
         return getScriptScenesContentAsFile(scriptId)
                 .flatMap(file -> {
-                    // 在flatMap中使用Mono.fromCallable来处理文件读取
                     return Mono.fromCallable(() -> {
                         try {
                             return readFileToString(file);
                         } catch (IOException e) {
-                            // 将IOException转换为RuntimeException
                             throw new RuntimeException("Failed to read file content", e);
                         }
                     });
@@ -100,15 +98,13 @@ public class ScriptManagement {
                 })
                 .collectList()
                 .flatMap(scriptContents -> {
-                    // 将text和获取的所有scripts内容整合给AI接口进行比对
+
                     String combinedText = combineTextWithScripts(text, scriptContents);
 
-                    // 调用AI接口进行比对，返回所有相符的scriptId
                     return callAIForMultipleMatches(combinedText);
                 });
     }
 
-    // 新增方法：将输入的text与所有scriptContents的内容组合
     private String combineTextWithScripts(String text, List<ScriptContent> scriptContents) {
         StringBuilder combinedText = new StringBuilder("Input Text: ");
         combinedText.append(text).append("\n");
@@ -121,7 +117,6 @@ public class ScriptManagement {
         return combinedText.toString();
     }
 
-    // 调用AI接口进行多重匹配
     private Mono<List<Long>> callAIForMultipleMatches(String combinedText) {
         String prompt = "Compare the following script contents with the provided text and return the IDs of all similar scripts.\n" + combinedText;
 
@@ -145,7 +140,6 @@ public class ScriptManagement {
                 .collect(Collectors.toList());
     }
 
-    // 定义ScriptContent类用于封装脚本ID和内容
     private static class ScriptContent {
         private final Long scriptId;
         private final String content;
@@ -186,43 +180,16 @@ public class ScriptManagement {
 
     private Mono<String> summaryShort(String text) {
         String prompt = "Please summarize the provided text to less than 20 words: " + text;
-//        System.out.println("Generated Prompt: " + prompt); // 输出生成的提示信息
+//        System.out.println("Generated Prompt: " + prompt);
 
         AITestRequestBody requestBody = new AITestRequestBody();
         requestBody.setPromot(prompt);
 
         return aiGemini.textGeneration(requestBody)
-                .doOnNext(response -> System.out.println("AI Response: " + response)) // 输出AI接口的响应
+                .doOnNext(response -> System.out.println("AI Response: " + response))
                 .onErrorResume(e -> {
                     System.err.println("Error in summaryShort: " + e.getMessage());
                     return Mono.just("Error in summary generation");
                 });
     }
-
-
-    // 内部长摘要方法
-    private Mono<String> summaryLong(String text) {
-        String prompt = "Please summarize the provided text to less than 400 words: " + text;
-//        System.out.println("Generated Prompt: " + prompt); // 输出生成的提示信息
-
-        AITestRequestBody requestBody = new AITestRequestBody();
-        requestBody.setPromot(prompt);
-
-        return aiGemini.textGeneration(requestBody)
-                .doOnNext(response -> System.out.println("AI Response: " + response)) // 输出AI接口的响应
-                .onErrorResume(e -> {
-                    System.err.println("Error in summaryShort: " + e.getMessage());
-                    return Mono.just("Error in summary generation");
-                });
-    }
-
-
-
-    // 控制器或服务代码
-    public Mono<List<Script>> findSimilarScriptsByUser(Long userId, String text) {
-        return Mono.just(scriptRepository.findByCreatorAndNameContaining(userId, text));
-    }
-
-
-
 }

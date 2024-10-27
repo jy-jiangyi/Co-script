@@ -13,12 +13,12 @@ const { Content } = Layout;
 const { Search } = Input;
 
 const ScriptManagementPage = () => {
-    const [scripts, setScripts] = useState([]);  // 所有脚本数据
-    const [filteredScripts, setFilteredScripts] = useState([]);  // 存储过滤后的脚本数据
+    const [scripts, setScripts] = useState([]);
+    const [filteredScripts, setFilteredScripts] = useState([]);
     const [fileContent, setFileContent] = useState('');
     const [newFileName, setNewFileName] = useState('');
     const navigate = useNavigate();
-    const [searchResults, setSearchResults] = useState([]);  // 存储搜索结果的scriptId
+    const [searchResults, setSearchResults] = useState([]);
 
     // Modal visibility state
     const [isUploadFailVisible, setUploadFailVisible] = useState(false);
@@ -33,11 +33,11 @@ const ScriptManagementPage = () => {
             try {
                 const response = await axios.post('/api/script_management/findAllScripts');
                 setScripts(response.data);
-                setFilteredScripts(response.data);  // 初始化时显示所有脚本
+                setFilteredScripts(response.data);
                 console.log(response.data);
             } catch (error) {
                 console.error('Error fetching scripts:', error);
-                message.error('获取脚本列表失败');
+                message.error('Failed get scripts:', error);
             }
         };
 
@@ -47,24 +47,22 @@ const ScriptManagementPage = () => {
     // Handle search
     const handleSearch = async (text) => {
         try {
-            // 调用后端搜索接口
             const response = await axios.post('/api/script_management/search', { text });
 
             if (response.status === 200) {
                 const scriptIds = response.data;
-                console.log("Received script IDs: ", scriptIds); // 输出返回的ID列表
-                setSearchResults(scriptIds); // 更新状态
+                console.log("Received script IDs: ", scriptIds);
+                setSearchResults(scriptIds);
 
-                // 根据搜索结果过滤脚本数据
                 const results = scripts.filter(script => scriptIds.includes(script.id));
-                setFilteredScripts(results);  // 更新显示的脚本
-                message.success('搜索成功');
+                setFilteredScripts(results);
+                message.success('Successfully searched scripts.');
             } else {
-                message.error('搜索失败，请重试');
+                message.error('Search Failed');
             }
         } catch (error) {
-            console.error('搜索失败：', error);
-            message.error('搜索失败，请重试');
+            console.error('Search Failed：', error);
+            message.error('Search Failed');
         }
     };
 
@@ -72,8 +70,8 @@ const ScriptManagementPage = () => {
     const beforeUpload = (file) => {
         const isTxt = file.type === 'text/plain';
         if (!isTxt) {
-            message.error('只能上传TXT文件！');
-            return Upload.LIST_IGNORE; // 阻止上传
+            message.error('Only .txt allowed！');
+            return Upload.LIST_IGNORE;
         }
         return true;
     };
@@ -82,25 +80,24 @@ const ScriptManagementPage = () => {
     const handleFileUpload = (info) => {
         const file = info.file.originFileObj;
         if (info.file.status === 'done' || file) {
-            // 使用 FileReader 读取文件内容
             const reader = new FileReader();
             reader.onload = (e) => {
                 const content = e.target.result;
-                setFileContent(content); // 设置文件内容
-                setNewFileName(file.name); // 默认文件名
-                setUploadSuccessVisible(true); // 显示成功上传的弹窗
+                setFileContent(content);
+                setNewFileName(file.name);
+                setUploadSuccessVisible(true);
             };
             reader.readAsText(file);
-            message.success(`${info.file.name} 文件上传成功`);
+            message.success(`${info.file.name} successfully uploaded`);
         } else if (info.file.status === 'error') {
-            message.error(`${info.file.name} 文件上传失败`);
+            message.error(`${info.file.name} upload Failed`);
         }
     };
 
     // Handle rename and save
     const handleRenameAndSave = async () => {
         if (!newFileName) {
-            message.error('请输入新的文件名！');
+            message.error('please rename the file！');
             return;
         }
 
@@ -109,10 +106,10 @@ const ScriptManagementPage = () => {
                 fileName: newFileName,
                 content: fileContent,
             });
-            message.success('文件名和内容已成功发送！');
+            message.success('send success！');
             setUploadSuccessVisible(false);
         } catch (error) {
-            message.error('文件名和内容发送失败！');
+            message.error('send fail！');
             console.error(error);
         }
     };
@@ -136,11 +133,11 @@ const ScriptManagementPage = () => {
                     <Col span={8}>
                         <Upload.Dragger
                             name="files"
-                            multiple={false}  // 只允许上传一个文件
+                            multiple={false}
                             action="/api/upload"
-                            beforeUpload={beforeUpload}  // 验证文件类型
+                            beforeUpload={beforeUpload}
                             onChange={handleFileUpload}
-                            accept=".txt"  // 限制上传文件类型为 .txt
+                            accept=".txt"
                             showUploadList={false}
                             className="upload-dragger"
                             style={{ height: '100px', width: '360px' }}

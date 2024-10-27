@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-
+import * as React from 'react';
+import {createContext, useContext, useState} from "react";
 // 创建一个 Context
 export const ActiveCtx = createContext({
     activeCtx: '',

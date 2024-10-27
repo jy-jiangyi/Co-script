@@ -51,7 +51,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/rewrite/, "rewrite"),
       },
-
+      "/download_control": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/download_control/, "download_control"),
+      },
+      "/tweet": {
+        target: "http://localhost:8080/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tweet/, "tweet"),
+      },
     }
   }
 })

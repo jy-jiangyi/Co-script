@@ -22,4 +22,7 @@ public interface ScriptScenesRepository extends CrudRepository<ScriptScenes, Lon
     @Transactional
     @Query("UPDATE ScriptScenes s SET s.content = ?2 WHERE s.id = ?1")
     int updateContent(Long id, String newContent);
+
+    @Query("SELECT MAX(s.scene) FROM ScriptScenes s WHERE s.script.id = ?1")
+    Integer findMaxSceneByScriptId(Long scriptId);
 }

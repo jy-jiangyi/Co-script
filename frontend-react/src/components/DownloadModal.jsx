@@ -9,55 +9,51 @@ const DownloadModal = ({ visible, onClose, scriptId }) => {
     const [downloadSuccessVisible, setDownloadSuccessVisible] = useState(false);
     const [downloadFailVisible, setDownloadFailVisible] = useState(false);
 
-    // 处理格式选择
     const handleFormatChange = (checkedValues) => {
         setSelectedFormats(checkedValues);
     };
 
-    // 执行下载逻辑
     const handleDownload = async () => {
         if (!scriptId || selectedFormats.length === 0) {
-            message.error('请选择至少一个格式或确保 scriptId 存在');
+            message.error('please select at least one format!');
             return;
         }
 
         try {
             for (const format of selectedFormats) {
                 const formatValue = getFormatValue(format);
+                const url = `/download_control/download/${scriptId}?format=${formatValue}`;
 
-                // 发起下载请求
-                const response = await axios.get(
-                    `/download/${scriptId}`,
-                    {
-                        params: { format: formatValue },
-                        responseType: 'blob', // 处理二进制数据
-                    }
-                );
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Download Failed');
+                }
 
-                downloadFile(response.data, format);
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.setAttribute('download', `script.${format.toLowerCase()}`);
+
+                if (link) {
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    message.error('Failed create download link');
+                }
+
+                window.URL.revokeObjectURL(blobUrl);
             }
 
-            // 如果所有文件下载成功，显示成功弹窗
             setDownloadSuccessVisible(true);
         } catch (error) {
-            console.error('下载出错:', error);
-            setDownloadFailVisible(true); // 显示失败弹窗
+            console.error('download error:', error);
+            setDownloadFailVisible(true);
         }
     };
 
-    // 文件下载函数
-    const downloadFile = (data, format) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `script.${format.toLowerCase()}`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-    };
-
-    // 将选择的格式映射为后端的格式参数
     const getFormatValue = (format) => {
         switch (format) {
             case 'PDF': return 1;
@@ -93,7 +89,6 @@ const DownloadModal = ({ visible, onClose, scriptId }) => {
                 </div>
             </Modal>
 
-            {/* 成功和失败弹窗 */}
             <DownloadSuccessModal
                 visible={downloadSuccessVisible}
                 onClose={() => setDownloadSuccessVisible(false)}

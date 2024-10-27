@@ -17,4 +17,7 @@ public interface ScriptRepository extends CrudRepository<Script, Long> {
     List<Script> findByCreator(Long creatorId);
 
     List<Script> findByCreatorAndNameContaining(Long creator, String text);
+
+    @Query("SELECT s FROM Script s WHERE s.id = :scriptId")
+    Script findByScriptId(@Param("scriptId") Long scriptId);
 }

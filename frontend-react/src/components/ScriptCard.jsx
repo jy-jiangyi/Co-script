@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import { Card, Button, Row, Col, message } from 'antd';
-import { DownloadOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import React, {useContext, useState} from 'react';
+import {Button, Card, Col, message, Row} from 'antd';
+import {DownloadOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import StyleAnalysisModal from './StyleAnalysisModal';
 import axios from 'axios';
 import DownloadModal from "./DownloadModal.jsx";
 import {useNavigate} from "react-router-dom";
+import {ScriptContext} from "../hooks/ScriptContext.jsx";
 
 const ScriptCard = ({ title, description, scriptId }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDownloadModalVisible, setDownloadModalVisible] = useState(false); // 控制DownloadModal的可见性
     const [longSummary, setLongSummary] = useState('');
-    const navigate = useNavigate(); // 初始化navigate
-
+    const navigate = useNavigate();
+    const { setScriptId } = useContext(ScriptContext);
 
     const showModal = async () => {
-        console.log('scriptId:', scriptId); // 检查scriptId的值
+        console.log('scriptId:', scriptId);
         console.log('tltle:', title);
 
         if (!scriptId) {
@@ -38,15 +39,16 @@ const ScriptCard = ({ title, description, scriptId }) => {
     };
 
     const showDownloadModal = () => {
-        setDownloadModalVisible(true); // 显示DownloadModal
+        setDownloadModalVisible(true);
     };
 
     const closeDownloadModal = () => {
-        setDownloadModalVisible(false); // 关闭DownloadModal
+        setDownloadModalVisible(false);
     };
 
     const handleMoreClick = () => {
-        navigate('/script_editing', { state: { scriptId } });
+        setScriptId(scriptId);
+        navigate('/script_editing');
     };
 
     return (
@@ -61,7 +63,6 @@ const ScriptCard = ({ title, description, scriptId }) => {
                     padding: '0px',
                 }}
             >
-                {/* 卡片头部区域：标题和 More 按钮 */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -73,7 +74,7 @@ const ScriptCard = ({ title, description, scriptId }) => {
                     <Button
                         type="link"
                         style={{ paddingTop: '5px', margin: '0', textAlign: 'right' }}
-                        onClick={handleMoreClick} // 点击时触发跳转
+                        onClick={handleMoreClick}
                     >
                         More
                     </Button>
@@ -84,7 +85,7 @@ const ScriptCard = ({ title, description, scriptId }) => {
                     <p>{description}</p>
                 </div>
 
-                {/* 底部按钮区域 */}
+                {/* bottom button */}
                 <div
                     style={{
                         marginBottom: 'auto',
@@ -99,7 +100,7 @@ const ScriptCard = ({ title, description, scriptId }) => {
                                 type="link"
                                 icon={<DownloadOutlined />}
                                 style={{ width: '100%', textAlign: 'center' }}
-                                onClick={showDownloadModal} // 点击后显示DownloadModal
+                                onClick={showDownloadModal}
                             >
                                 Download
                             </Button>
@@ -118,20 +119,20 @@ const ScriptCard = ({ title, description, scriptId }) => {
                 </div>
             </Card>
 
-            {/* 弹出的 StyleAnalysisModal 组件 */}
+            {/* StyleAnalysisModal  */}
             <StyleAnalysisModal
                 visible={isModalVisible}
                 onClose={closeModal}
                 scriptTitle={title}
-                scriptAnalysis={description}  // 上部显示 short summary
-                longSummary={longSummary}// 下部显示 long summary
+                scriptAnalysis={description}
+                longSummary={longSummary}
                 scriptId={scriptId}
             />
 
             <DownloadModal
                 visible={isDownloadModalVisible}
                 onClose={closeDownloadModal}
-                scriptId={scriptId} // 传递 scriptId
+                scriptId={scriptId}
             />
         </>
     );

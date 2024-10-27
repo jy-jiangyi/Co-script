@@ -92,4 +92,20 @@ public class ScriptGeneration {
     }
 
 
+    // generate scene by AI Continuation
+    public Mono<String> generateScriptByAIContinuation(long scriptId, int sceneId, String name, List<String> contextList, String positive, String negative) {
+
+        String context = String.join(", ", contextList);
+
+        String prompt = "Name: " + name + "\n"
+                + "Context: " + context + "\n"
+                + "Positive: " + positive + "\n"
+                + "Negative: " + negative + "\n";
+
+        AITestRequestBody requestBody = new AITestRequestBody();
+        requestBody.setPromot("Please generate a detailed script based on the following information:\n" + prompt);
+
+        return aiGemini.textGeneration(requestBody);
+
+    }
 }
