@@ -135,10 +135,10 @@ function SceneList({ scenes, onUpdateScene }) {
 
 function SceneIllustrationGenerationPage() {
     // const { scriptId } = useParams(); // 获取路由参数中的 scriptId
-    const scriptId = 1;
+    // const scriptId = 1;
     const [scriptName, setScriptName] = useState('');
     const [scenes, setScenes] = useState([]);
-    // const { scriptId } = useContext(ScriptContext);
+    const { scriptId } = useContext(ScriptContext);
 
     const [loading, setLoading] = useState(false);
 
