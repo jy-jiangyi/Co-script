@@ -18,6 +18,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -134,13 +135,60 @@ public class FileDownloadController {
 
     // JPEG
     private byte[] generateJpeg(String scriptContent) throws IOException {
-        BufferedImage image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, 800, 600);
-        g2d.setColor(Color.BLACK);
+        int imageWidth = 800;
+        int imageHeight = 600;
+        int lineHeight = 25; // 每行的高度
+        int marginX = 50; // 左右边距
+        int marginY = 100; // 上下边距
 
-        g2d.drawString(scriptContent, 50, 100);
+        BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = image.createGraphics();
+
+        // 设置抗锯齿
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        // 设置背景颜色为白色
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, imageWidth, imageHeight);
+
+        // 设置字体和颜色
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 20));
+
+        // 获取字体的字体渲染上下文
+        FontRenderContext frc = g2d.getFontRenderContext();
+
+        // 拆分文本，确保不会超过图像宽度
+        String[] words = scriptContent.split(" ");
+        StringBuilder line = new StringBuilder();
+        int yPosition = marginY; // 初始 y 位置
+
+        for (String word : words) {
+            // 判断当前行是否超出宽度限制
+            String testLine = line + word + " ";
+            int lineWidth = (int) g2d.getFont().getStringBounds(testLine, frc).getWidth();
+
+            // 如果超过宽度限制，绘制当前行并换行
+            if (lineWidth + marginX > imageWidth) {
+                g2d.drawString(line.toString(), marginX, yPosition);
+                line = new StringBuilder(word + " ");
+                yPosition += lineHeight;
+
+                // 如果超过图像高度限制，则停止绘制
+                if (yPosition + lineHeight > imageHeight) {
+                    break;
+                }
+            } else {
+                line.append(word).append(" ");
+            }
+        }
+
+        // 绘制剩余的文本
+        if (!line.toString().isEmpty() && yPosition + lineHeight <= imageHeight) {
+            g2d.drawString(line.toString(), marginX, yPosition);
+        }
+
         g2d.dispose();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
