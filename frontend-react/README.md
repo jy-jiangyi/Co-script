@@ -9,7 +9,8 @@ get into /frontend-react.
 4. install icons package: Run `npm install ant-design-icons --save`
 5. `npm install styled-components`
 6. `npm install react-tsparticles tsparticles`
-7. `npm rebuild`
+7. `npm install react-twitter-embed`
+8. `npm rebuild`
 
 ## 2 update dependency
 `npm rebuild`
