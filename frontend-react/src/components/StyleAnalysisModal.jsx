@@ -15,8 +15,6 @@ const StyleAnalysisModal = ({ visible, onClose, scriptTitle, scriptAnalysis, lon
     const [isDownloadModalVisible, setDownloadModalVisible] = useState(false);
     const { setScriptId } = useContext(ScriptContext);
 
-
-    // 打印 scriptId 以确认是否正确传递
     useEffect(() => {
         console.log('Received scriptId:', scriptId);
     }, [scriptId]);

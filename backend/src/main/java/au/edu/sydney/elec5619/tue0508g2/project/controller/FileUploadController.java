@@ -16,37 +16,35 @@ import java.util.Map;
 public class FileUploadController {
 
     @Resource
-    private ScriptRepository scriptRepository; // 脚本表的仓库
+    private ScriptRepository scriptRepository;
 
     @Resource
-    private ScriptScenesRepository scriptSceneRepository; // 场景表的仓库
+    private ScriptScenesRepository scriptSceneRepository;
 
     @PostMapping("/saveFile")
     public ResponseEntity<String> saveFile(@RequestBody Map<String, String> request, HttpSession session) {
-        String fileName = request.get("fileName"); // 文件名
-        String content = request.get("content"); // 文件内容
+        String fileName = request.get("fileName");
+        String content = request.get("content");
 
-        // Step 1: 从 HttpSession 中获取 userId
+        // get userid
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            return ResponseEntity.badRequest().body("用户未登录！");
+            return ResponseEntity.badRequest().body("Need Login！");
         }
 
-        // Step 2: 在 scripts 表中创建新脚本记录
         Script script = new Script();
         script.setName(fileName);
-        script.setCreator(userId); // 设置创建者ID
-        scriptRepository.save(script); // 保存脚本记录
+        script.setCreator(userId);
+        scriptRepository.save(script);
 
-        // Step 3: 在 script_scenes 表中创建对应的场景记录
         ScriptScenes scene = new ScriptScenes();
-        scene.setScene(1); // 场次设置为1
-        scene.setContent(content); // 场景内容为上传的文件内容
-        scene.setTitle(fileName); // 标题为上传的文件名
-        scene.setScript(script); // 关联 Script 对象
-        scriptSceneRepository.save(scene); // 保存场景记录
+        scene.setScene(1);
+        scene.setContent(content);
+        scene.setTitle(fileName);
+        scene.setScript(script);
+        scriptSceneRepository.save(scene);
 
 
-        return ResponseEntity.ok("文件内容和脚本已成功保存！");
+        return ResponseEntity.ok("saved successfully！");
     }
 }
