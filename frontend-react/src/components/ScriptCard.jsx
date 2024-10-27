@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { Card, Button, Row, Col, message } from 'antd';
-import { DownloadOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import React, {useContext, useState} from 'react';
+import {Button, Card, Col, message, Row} from 'antd';
+import {DownloadOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import StyleAnalysisModal from './StyleAnalysisModal';
 import axios from 'axios';
 import DownloadModal from "./DownloadModal.jsx";
 import {useNavigate} from "react-router-dom";
+import {ScriptContext} from "../hooks/ScriptContext.jsx";
 
 const ScriptCard = ({ title, description, scriptId }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDownloadModalVisible, setDownloadModalVisible] = useState(false); // 控制DownloadModal的可见性
     const [longSummary, setLongSummary] = useState('');
     const navigate = useNavigate(); // 初始化navigate
-
+    const { setScriptId } = useContext(ScriptContext);
 
     const showModal = async () => {
         console.log('scriptId:', scriptId); // 检查scriptId的值
@@ -46,7 +47,8 @@ const ScriptCard = ({ title, description, scriptId }) => {
     };
 
     const handleMoreClick = () => {
-        navigate('/script_editing', { state: { scriptId } });
+        setScriptId(scriptId);
+        navigate('/script_editing');
     };
 
     return (
