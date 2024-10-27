@@ -24,17 +24,32 @@ const DownloadModal = ({ visible, onClose, scriptId }) => {
         try {
             for (const format of selectedFormats) {
                 const formatValue = getFormatValue(format);
+                const url = `/download_control/download/${scriptId}?format=${formatValue}`;
 
                 // 发起下载请求
-                const response = await axios.get(
-                    `/download/${scriptId}`,
-                    {
-                        params: { format: formatValue },
-                        responseType: 'blob', // 处理二进制数据
-                    }
-                );
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('下载失败');
+                }
 
-                downloadFile(response.data, format);
+                const blob = await response.blob(); // 将响应转换为 blob
+                const blobUrl = window.URL.createObjectURL(blob); // 创建 Blob URL
+
+                // 创建 <a> 元素用于下载
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.setAttribute('download', `script.${format.toLowerCase()}`);
+
+                // 判断 link 是否成功创建，避免 null 错误
+                if (link) {
+                    document.body.appendChild(link);
+                    link.click(); // 自动触发点击事件，开始下载
+                    document.body.removeChild(link); // 下载完成后移除链接
+                } else {
+                    message.error('创建下载链接失败');
+                }
+
+                window.URL.revokeObjectURL(blobUrl); // 释放 Blob URL
             }
 
             // 如果所有文件下载成功，显示成功弹窗
@@ -44,6 +59,8 @@ const DownloadModal = ({ visible, onClose, scriptId }) => {
             setDownloadFailVisible(true); // 显示失败弹窗
         }
     };
+
+
 
     // 文件下载函数
     const downloadFile = (data, format) => {
