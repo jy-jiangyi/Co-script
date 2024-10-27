@@ -115,6 +115,7 @@ const ScriptDemo1 = () => {
 
         const scenesResponse = await axios.get(`/scripts/${id}/scenes`);
         setScenes(scenesResponse.data);
+        return scenesResponse.data;
       } catch (error) {
         console.error(error);
       }
@@ -122,7 +123,10 @@ const ScriptDemo1 = () => {
   }; 
 
   useEffect(() => {
-    fetchScriptAndScenes();
+    fetchScriptAndScenes().then(scs => {
+    setSelectedScene(scs[0]);
+    setEditorContent(scs[0].content);
+    });
   }, []);
 
   useEffect(() => {
