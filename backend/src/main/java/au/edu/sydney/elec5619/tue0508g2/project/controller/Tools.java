@@ -35,8 +35,7 @@ public class Tools {
     @GetMapping("/tweet")
     public String tweet_test(@RequestParam(value = "content") String content, HttpServletRequest request){
         utils.getLoginUser(request);
-        x.tweet(content);
-        return "Done";
+        return x.tweet(content);
     }
 
 
