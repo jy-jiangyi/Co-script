@@ -26,8 +26,16 @@ public class X {
     }
 
     public String tweet(String content) {
-        Tweet tweet = client.postTweet(content);
-        return tweet.getId();
+        try {
+            Tweet tweet = client.postTweet(content);
+            if (tweet.getId() != null) {
+                return tweet.getId();
+            }else{
+                return "failed";
+            }
+        }catch (Exception failed){
+            return failed.getMessage();
+        }
     }
 
 }

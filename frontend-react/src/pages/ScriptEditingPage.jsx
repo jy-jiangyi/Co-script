@@ -12,6 +12,7 @@ import {
   Input,
   Select,
   message,
+  notification
 } from "antd";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
@@ -26,6 +27,7 @@ import "react-quill/dist/quill.snow.css";
 import { marked } from "marked";
 import { TwitterOutlined } from '@ant-design/icons';
 import {ScriptContext} from "../hooks/ScriptContext.jsx";
+import {TwitterTweetEmbed}  from 'react-twitter-embed';
 
 
 const { Content, Sider } = Layout;
@@ -53,6 +55,9 @@ const ScriptDemo1 = () => {
   const [selectedContext, setSelectedContext] = useState("");
   const [sceneNameForAIContinuation, setSceneNameForAIContinuation] = useState("");
   const location = useLocation();
+  
+  const [api, contextHolder] = notification.useNotification();
+  const [tweetId, setTweetId] = useState('');
 
   const StyledTabs = styled(Tabs)`
     .ant-tabs-nav::before {
@@ -83,14 +88,31 @@ const ScriptDemo1 = () => {
             method: 'GET', // 使用 GET 请求
         });
 
-        const data = await response.text(); // 解析文本响应
+        const tweetId = await response.text(); // 解析文本响应
+        if(tweetId == "failed"){
+          api.open({
+            message: 'Tweet',
+            description:
+            "Failed to tweet, maybe same content trigger twice",
+            duration: 0,
+          });
+        }else{
+          api.open({
+            message: 'Tweet',
+            description:
+            <TwitterTweetEmbed
+            tweetId={tweetId}
+            />,
+            duration: 0,
+          });
+        }
 
         // 检查返回结果
-        if (data === "Done") {
-            window.alert("Progress is shared successfully!"); // 弹出窗口
+        /*if (data === "Done") {
+            // window.alert("Progress is shared successfully!"); // 弹出窗口
         } else {
-            window.alert("Failed to share progress."); // 其他情况
-        }
+            // window.alert("Failed to share progress."); // 其他情况
+        }*/
     } catch (error) {
         console.error("Error sharing progress:", error);
         window.alert("An error occurred while sharing progress."); // 错误处理
@@ -328,6 +350,7 @@ const ScriptDemo1 = () => {
 
   return (
     <Layout>
+        {contextHolder}
       <Content style={{ padding: "0 48px" }}>
         <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item>
