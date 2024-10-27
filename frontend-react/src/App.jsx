@@ -6,14 +6,20 @@ import './App.css'
 import {HashRouter} from "react-router-dom";
 import ProjectRoutes from "./routers/routers.jsx";
 import {ScriptProvider} from "./hooks/ScriptContext.jsx";
+import {ActiveCtxProvider} from "./hooks/ActiveContext.tsx";
+import {ActiveUserProvider} from "./hooks/UserContext.tsx";
 
 function App() {
 
     return (
         <HashRouter>
-            <ScriptProvider>
-                <ProjectRoutes/>
-            </ScriptProvider>
+            <ActiveUserProvider>
+                <ActiveCtxProvider>
+                    <ScriptProvider>
+                        <ProjectRoutes/>
+                    </ScriptProvider>
+                </ActiveCtxProvider>
+            </ActiveUserProvider>
         </HashRouter>
     )
 }
