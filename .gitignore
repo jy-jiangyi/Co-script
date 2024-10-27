@@ -38,3 +38,4 @@ out/
 .vscode/
 frontend-react/frontend-react.code-workspace
 backend/src/main/resources/application-secret.properties
+frontend-react/package-lock.json

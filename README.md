@@ -42,7 +42,7 @@ Plugins:
 
 - Set up the environments:
   
-  - Database: `DB_PASSWORD=wukong@3A;DB_URL=jdbc:mysql://blackstore.mysql.database.azure.com:3306/COMP5619;DB_USER=blackmyth`
+  - Database: `DB_PASSWORD=YOUR_DB_PW;DB_URL=jdbc:mysql://blackstore.mysql.database.azure.com:3306/COMP5619;DB_USER=YOUR_USER`
   
   - API keys: `GEMINI_API_KEY=YOUR_API_KEY` and `OPENAI_API_KEY=YOUR_API_KEY`
 
@@ -78,11 +78,14 @@ The frontend use React framework. We use Vite ('^5.4.1') as the local developmen
 
 Get into /frontend-react.
 
-1. install node_modules: Run `npm install`
-2. install react-router-dom@6 `npm install react-router-dom@6`
-3. install ant-design: Run `npm install antd --save`
-4. install icons package: Run `npm install ant-design-icons --save`
-5. `npm install styled-components`
+1. install node_modules: Run `npm install`  
+2. install react-router-dom@6 `npm install react-router-dom@6`  
+3. install ant-design: Run `npm install antd --save`  
+4. install icons package: Run `npm install ant-design-icons --save`  
+5. `npm install styled-components`  
+6. `npm install react-tsparticles tsparticles`  
+7. `npm install react-twitter-embed`  
+8. `npm rebuild`
 
 ### How to run the frontend
 
